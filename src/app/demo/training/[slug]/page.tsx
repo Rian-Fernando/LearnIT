@@ -18,7 +18,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const found = await getModule(GUEST_VIEWER, slug);
   return found
-    ? { title: found.title, description: found.summary }
+    ? {
+        title: found.title,
+        description: found.summary,
+        alternates: { canonical: `/demo/training/${slug}` },
+        openGraph: {
+          title: found.title,
+          description: found.summary,
+          url: `/demo/training/${slug}`,
+          type: "article",
+        },
+      }
     : { title: "Module not found" };
 }
 

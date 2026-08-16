@@ -17,7 +17,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const scenario = await getScenario(GUEST_VIEWER, slug);
   return scenario
-    ? { title: scenario.title, description: scenario.summary }
+    ? {
+        title: scenario.title,
+        description: scenario.summary,
+        alternates: { canonical: `/demo/practice/${slug}` },
+        openGraph: {
+          title: scenario.title,
+          description: scenario.summary,
+          url: `/demo/practice/${slug}`,
+          type: "article",
+        },
+      }
     : { title: "Scenario not found" };
 }
 

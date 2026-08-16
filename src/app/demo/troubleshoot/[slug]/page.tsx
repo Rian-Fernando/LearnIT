@@ -17,7 +17,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const flow = await getFlow(GUEST_VIEWER, slug);
   return flow
-    ? { title: flow.title, description: flow.summary }
+    ? {
+        title: flow.title,
+        description: flow.summary,
+        alternates: { canonical: `/demo/troubleshoot/${slug}` },
+        openGraph: {
+          title: flow.title,
+          description: flow.summary,
+          url: `/demo/troubleshoot/${slug}`,
+          type: "article",
+        },
+      }
     : { title: "Workflow not found" };
 }
 
