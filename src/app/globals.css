@@ -15,42 +15,51 @@
    ========================================================================== */
 
 :root {
-  /* --- raw palette ------------------------------------------------------ */
-  --lt-ink-950: #08090b;
-  --lt-ink-925: #0b0d10;
-  --lt-ink-900: #0e1014;
-  --lt-ink-850: #13161b;
-  --lt-ink-800: #191d23;
-  --lt-ink-700: #262b33;
-  --lt-ink-600: #3a414b;
-  --lt-ink-500: #5b636f;
-  --lt-ink-400: #808894;
-  --lt-ink-300: #a8aeb8;
-  --lt-ink-200: #cdd1d8;
-  --lt-ink-100: #e7e9ed;
-  --lt-ink-50: #f5f6f8;
+  /* --- raw palette ------------------------------------------------------
+     "Highlighter" — the identity is built on the colour of marking the thing
+     you are learning. Chartreuse against a near-black carrying the faintest
+     green cast, so the accent reads as belonging to the surface rather than
+     sitting on top of it.
+     ---------------------------------------------------------------------- */
+  --lt-ink-950: #0a0b09;
+  --lt-ink-925: #0d0f0c;
+  --lt-ink-900: #121410;
+  --lt-ink-850: #181b15;
+  --lt-ink-800: #1f231b;
+  --lt-ink-700: #2b3025;
+  --lt-ink-600: #3f4638;
+  --lt-ink-500: #5f6857;
+  --lt-ink-400: #868f7c;
+  --lt-ink-300: #adb5a4;
+  --lt-ink-200: #cdd3c7;
+  --lt-ink-100: #e5e9e1;
+  --lt-ink-50: #f3f5ef;
   --lt-ink-0: #ffffff;
 
-  /* Adelphi gold, re-tuned for screen use. */
-  --lt-gold-300: #f7cd82;
-  --lt-gold-400: #f2b552;
-  --lt-gold-500: #e89f2c;
-  --lt-gold-600: #c47f16;
-  --lt-gold-700: #96600f;
-  --lt-gold-800: #6b440a;
+  /* The highlighter itself. */
+  --lt-lime-200: #e4f9a8;
+  --lt-lime-300: #d6f578;
+  --lt-lime-400: #c7f04a;
+  --lt-lime-500: #b9e637;
+  --lt-lime-600: #86ad1e;
+  --lt-lime-700: #4f6b0f;
+  --lt-lime-800: #35480a;
 
-  /* Cool "signal" hue for technical/system states — used sparingly. */
-  --lt-signal-300: #8fdfe9;
-  --lt-signal-400: #55c6d6;
-  --lt-signal-500: #2ba7ba;
-  --lt-signal-600: #1c8497;
+  /* Cool "signal" hue for technical/system states — used sparingly, and
+     chosen to sit opposite the accent so the two never compete. */
+  --lt-signal-300: #8fdcef;
+  --lt-signal-400: #56c7e8;
+  --lt-signal-500: #2ba5ca;
+  --lt-signal-600: #166478;
 
-  --lt-green-400: #4ec98a;
-  --lt-green-600: #1f8a55;
-  --lt-amber-400: #f0a83c;
-  --lt-amber-600: #b06f10;
-  --lt-red-400: #f0685c;
-  --lt-red-600: #c4382c;
+  /* Success is emerald rather than green, so it stays distinguishable from
+     the lime accent at a glance. */
+  --lt-green-400: #34d399;
+  --lt-green-600: #0b7152;
+  --lt-amber-400: #f5b841;
+  --lt-amber-600: #8a5d09;
+  --lt-red-400: #f2685e;
+  --lt-red-600: #c4372c;
 
   /* --- semantic tokens: dark (default) ---------------------------------- */
   --surface-sunken: var(--lt-ink-950);
@@ -68,12 +77,14 @@
   --border-default: color-mix(in oklab, var(--lt-ink-0) 12%, transparent);
   --border-strong: color-mix(in oklab, var(--lt-ink-0) 22%, transparent);
 
-  --accent: var(--lt-gold-500);
-  --accent-hover: var(--lt-gold-400);
-  --accent-text: var(--lt-gold-400);
+  --accent: var(--lt-lime-400);
+  --accent-hover: var(--lt-lime-300);
+  --accent-text: var(--lt-lime-400);
+  /* Text placed on an accent fill. Lime is a light colour, so this is always
+     ink — never white. */
   --accent-contrast: var(--lt-ink-950);
-  --accent-soft: color-mix(in oklab, var(--lt-gold-500) 14%, transparent);
-  --accent-ring: color-mix(in oklab, var(--lt-gold-500) 45%, transparent);
+  --accent-soft: color-mix(in oklab, var(--lt-lime-400) 13%, transparent);
+  --accent-ring: color-mix(in oklab, var(--lt-lime-400) 45%, transparent);
 
   --signal: var(--lt-signal-400);
   --signal-soft: color-mix(in oklab, var(--lt-signal-400) 14%, transparent);
@@ -94,27 +105,30 @@
 
 /* --- semantic tokens: light ------------------------------------------- */
 :root[data-theme="light"] {
-  --surface-sunken: #eff0f3;
-  --surface-base: #f8f9fb;
+  --surface-sunken: #eef0e9;
+  --surface-base: #f7f8f4;
   --surface-raised: var(--lt-ink-0);
   --surface-overlay: var(--lt-ink-0);
   --surface-inset: var(--lt-ink-50);
 
-  --text-primary: #101318;
-  --text-secondary: #4d5560;
-  --text-tertiary: #737b87;
+  --text-primary: #10120e;
+  --text-secondary: #4d5546;
+  --text-tertiary: #656d5e;
   --text-inverse: var(--lt-ink-0);
 
-  --border-subtle: color-mix(in oklab, #101318 8%, transparent);
-  --border-default: color-mix(in oklab, #101318 14%, transparent);
-  --border-strong: color-mix(in oklab, #101318 26%, transparent);
+  --border-subtle: color-mix(in oklab, #10120e 8%, transparent);
+  --border-default: color-mix(in oklab, #10120e 14%, transparent);
+  --border-strong: color-mix(in oklab, #10120e 26%, transparent);
 
-  --accent: var(--lt-gold-600);
-  --accent-hover: var(--lt-gold-700);
-  --accent-text: var(--lt-gold-700);
-  --accent-contrast: var(--lt-ink-0);
-  --accent-soft: color-mix(in oklab, var(--lt-gold-500) 16%, transparent);
-  --accent-ring: color-mix(in oklab, var(--lt-gold-600) 45%, transparent);
+  /* Lime stays the fill in light mode with ink text on top — inverting to a
+     dark olive fill with white text fails contrast at this hue. Accent-as-text
+     darkens instead. */
+  --accent: var(--lt-lime-500);
+  --accent-hover: var(--lt-lime-600);
+  --accent-text: var(--lt-lime-700);
+  --accent-contrast: var(--lt-ink-950);
+  --accent-soft: color-mix(in oklab, var(--lt-lime-500) 22%, transparent);
+  --accent-ring: color-mix(in oklab, var(--lt-lime-600) 45%, transparent);
 
   --signal: var(--lt-signal-600);
   --signal-soft: color-mix(in oklab, var(--lt-signal-500) 16%, transparent);
@@ -126,9 +140,9 @@
   --status-danger: var(--lt-red-600);
   --status-danger-soft: color-mix(in oklab, var(--lt-red-600) 14%, transparent);
 
-  --shadow-sm: 0 1px 2px rgb(16 19 24 / 0.06);
-  --shadow-md: 0 4px 16px -4px rgb(16 19 24 / 0.1);
-  --shadow-lg: 0 24px 60px -20px rgb(16 19 24 / 0.18);
+  --shadow-sm: 0 1px 2px rgb(16 18 14 / 0.06);
+  --shadow-md: 0 4px 16px -4px rgb(16 18 14 / 0.1);
+  --shadow-lg: 0 24px 60px -20px rgb(16 18 14 / 0.18);
 
   color-scheme: light;
 }

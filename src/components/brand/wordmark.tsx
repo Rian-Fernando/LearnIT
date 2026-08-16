@@ -37,7 +37,7 @@ export function Wordmark({
       <span
         className={cn(
           "font-mono font-semibold tracking-[-0.02em]",
-          tone === "onDark" ? "text-[#e89f2c]" : "text-accent-text",
+          tone === "onDark" ? "text-[#c7f04a]" : "text-accent-text",
         )}
       >
         IT
