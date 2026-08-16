@@ -13,6 +13,7 @@ export const accountArticles: Article[] = [
     updatedAt: "2026-08-04",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     featured: true,
     related: ["password-reset-walkthrough", "alumni-account-transition"],
     body: [
@@ -114,6 +115,7 @@ export const accountArticles: Article[] = [
     updatedAt: "2026-08-04",
     updatedBy: "Help Desk Leadership",
     revision: 6,
+    verification: "unverified",
     featured: true,
     related: ["account-types-overview", "recognising-phishing-reports"],
     body: [
@@ -198,6 +200,7 @@ export const accountArticles: Article[] = [
     updatedAt: "2026-07-28",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     featured: false,
     related: ["account-types-overview"],
     body: [
@@ -270,6 +273,7 @@ export const accountArticles: Article[] = [
     updatedAt: "2026-08-08",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     featured: false,
     related: ["password-reset-walkthrough", "recognising-phishing-reports"],
     body: [

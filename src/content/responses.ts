@@ -24,6 +24,7 @@ export const responses: QuickResponse[] = [
     updatedAt: "2026-08-01",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     usage:
       "Use for straightforward availability questions. If the person has an urgent problem outside hours, address the problem first — do not answer with hours alone.",
     placeholders: [
@@ -56,6 +57,7 @@ University Help Desk`,
     updatedAt: "2026-08-09",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     usage:
       "Send before connecting, never after. The consent paragraph is not optional — do not trim it to make the message shorter.",
     placeholders: [
@@ -94,6 +96,7 @@ University Help Desk`,
     updatedAt: "2026-07-22",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     usage:
       "Good for walking someone through something on their own screen. Use the remote session invitation instead when you need to take control.",
     placeholders: [
@@ -124,6 +127,7 @@ University Help Desk`,
     updatedAt: "2026-08-05",
     updatedBy: "Help Desk Leadership",
     revision: 5,
+    verification: "unverified",
     usage:
       "Use as soon as a Konica device is confirmed. Log the ticket even though it is out of scope — volume data is the point.",
     placeholders: [
@@ -156,6 +160,7 @@ University Help Desk`,
     updatedAt: "2026-08-06",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     usage:
       "Use when a VPN report arrives with too little detail. Asking all of it at once avoids a three-day exchange of single questions.",
     placeholders: [],
@@ -187,6 +192,7 @@ University Help Desk`,
     updatedAt: "2026-08-04",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     usage:
       "Only after identity verification. Never include a password or a one-time code in this message.",
     placeholders: [
@@ -222,6 +228,7 @@ University Help Desk`,
     updatedAt: "2026-07-28",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     usage:
       "Confirm the account really has transitioned before sending. Fill in specifics — a vague version of this message generates a reply asking the same question again.",
     placeholders: [
@@ -252,6 +259,7 @@ University Help Desk`,
     updatedAt: "2026-08-02",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     usage:
       "Name the specific thing you are waiting on. A generic “just checking in” is the reason follow-ups get ignored.",
     placeholders: [
@@ -283,6 +291,7 @@ University Help Desk`,
     updatedAt: "2026-08-02",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     usage:
       "Send at the moment you escalate, not later. Do not commit to a resolution time on another team's behalf.",
     placeholders: [
@@ -313,6 +322,7 @@ University Help Desk`,
     updatedAt: "2026-08-02",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     usage: "Always state what was changed. “It's fixed” is not a record.",
     placeholders: [
       { key: "ticket_ref", label: "Ticket reference", example: "HD-10482" },
@@ -343,6 +353,7 @@ University Help Desk`,
     updatedAt: "2026-07-20",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     usage:
       "Only send when you can name the correct destination. Redirecting someone to “another department” without saying which is worse than not answering.",
     placeholders: [
@@ -374,6 +385,7 @@ University Help Desk`,
     updatedAt: "2026-07-20",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     usage: "Trim to the questions you actually need. Five questions get answered; twelve do not.",
     placeholders: [],
     template: `Hi {{name}},
@@ -405,6 +417,7 @@ University Help Desk`,
     updatedAt: "2026-08-08",
     updatedBy: "Help Desk Leadership",
     revision: 1,
+    verification: "unverified",
     usage:
       "Internal use only — never send this to a requester. Attach it to the ticket when handing over to on-call.",
     placeholders: [

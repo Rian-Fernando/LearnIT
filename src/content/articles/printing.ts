@@ -13,6 +13,7 @@ export const printingArticles: Article[] = [
     updatedAt: "2026-08-05",
     updatedBy: "Help Desk Leadership",
     revision: 5,
+    verification: "unverified",
     featured: true,
     related: ["printer-troubleshooting-path", "konica-device-redirect"],
     body: [
@@ -83,6 +84,7 @@ export const printingArticles: Article[] = [
     updatedAt: "2026-07-30",
     updatedBy: "Help Desk Leadership",
     revision: 6,
+    verification: "unverified",
     featured: false,
     related: ["printing-support-scope"],
     body: [
@@ -181,6 +183,7 @@ export const printingArticles: Article[] = [
     updatedAt: "2026-08-05",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     featured: false,
     related: ["printing-support-scope", "printer-troubleshooting-path"],
     body: [

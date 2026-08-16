@@ -20,6 +20,7 @@ export const scenarios: Scenario[] = [
     updatedAt: "2026-08-06",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     articleSlugs: ["vpn-connection-troubleshooting", "vpn-what-it-is"],
     ticket: {
       reference: "HD-10482",
@@ -211,6 +212,7 @@ export const scenarios: Scenario[] = [
     updatedAt: "2026-08-05",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     articleSlugs: ["konica-device-redirect", "printing-support-scope"],
     ticket: {
       reference: "HD-10517",
@@ -353,6 +355,7 @@ export const scenarios: Scenario[] = [
     updatedAt: "2026-08-08",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     articleSlugs: ["recognising-phishing-reports", "account-lockout-escalation"],
     ticket: {
       reference: "HD-10603",
@@ -540,6 +543,7 @@ export const scenarios: Scenario[] = [
     updatedAt: "2026-07-28",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     articleSlugs: ["alumni-account-transition", "account-types-overview"],
     ticket: {
       reference: "HD-10388",
@@ -681,6 +685,7 @@ export const scenarios: Scenario[] = [
     updatedAt: "2026-08-09",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     articleSlugs: ["remote-support-session-conduct"],
     ticket: {
       reference: "HD-10559",
@@ -854,6 +859,7 @@ export const scenarios: Scenario[] = [
     updatedAt: "2026-07-30",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     articleSlugs: ["printer-troubleshooting-path"],
     ticket: {
       reference: "HD-10441",

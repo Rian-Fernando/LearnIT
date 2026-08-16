@@ -6,13 +6,14 @@ export const systemModules: TrainingModule[] = [
     title: "Accounts and access",
     summary:
       "Account types and lifecycles, the password reset path, and the verification rule that never bends.",
-    order: 3,
+    order: 6,
     category: "accounts",
     visibility: "public",
     status: "published",
     updatedAt: "2026-08-04",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     prerequisites: ["help-desk-fundamentals"],
     outcomes: [
       "Identify an account type and what it should be able to reach",
@@ -221,13 +222,14 @@ export const systemModules: TrainingModule[] = [
     title: "Remote support",
     summary:
       "Consent, conduct, and closing out — how to run a remote session that a user would be glad to accept again.",
-    order: 4,
+    order: 9,
     category: "remote-support",
     visibility: "public",
     status: "published",
     updatedAt: "2026-08-09",
     updatedBy: "Help Desk Leadership",
     revision: 5,
+    verification: "unverified",
     prerequisites: ["help-desk-fundamentals", "communication"],
     outcomes: [
       "Decide whether remote control is the right tool",
@@ -385,13 +387,14 @@ export const systemModules: TrainingModule[] = [
     title: "Printing",
     summary:
       "Scope first, then the supported troubleshooting path — including the Konica redirect that saves everyone time.",
-    order: 5,
+    order: 10,
     category: "printing",
     visibility: "public",
     status: "published",
     updatedAt: "2026-08-05",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     prerequisites: ["help-desk-fundamentals"],
     outcomes: [
       "Identify whether a printer is in scope before troubleshooting",
@@ -527,13 +530,14 @@ export const systemModules: TrainingModule[] = [
     title: "VPN and connectivity",
     summary:
       "What the VPN is actually for, the ordered troubleshooting path, and the hotspot test that settles most tickets.",
-    order: 6,
+    order: 11,
     category: "vpn",
     visibility: "public",
     status: "published",
     updatedAt: "2026-08-06",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     prerequisites: ["help-desk-fundamentals"],
     outcomes: [
       "Decide whether a caller needs the VPN at all",

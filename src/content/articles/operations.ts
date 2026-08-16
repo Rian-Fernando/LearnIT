@@ -13,6 +13,7 @@ export const operationsArticles: Article[] = [
     updatedAt: "2026-08-09",
     updatedBy: "Help Desk Leadership",
     revision: 5,
+    verification: "unverified",
     featured: true,
     related: ["ticket-lifecycle", "handling-frustrated-users"],
     body: [
@@ -113,6 +114,7 @@ export const operationsArticles: Article[] = [
     updatedAt: "2026-08-02",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     featured: true,
     related: ["writing-useful-ticket-notes", "remote-support-session-conduct"],
     body: [
@@ -159,6 +161,7 @@ export const operationsArticles: Article[] = [
     updatedAt: "2026-08-02",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     featured: false,
     related: ["ticket-lifecycle"],
     body: [
@@ -243,6 +246,7 @@ User is reachable after 3pm weekdays.`,
     updatedAt: "2026-07-25",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     featured: true,
     related: ["professional-communication", "ticket-lifecycle"],
     body: [
@@ -322,6 +326,7 @@ User is reachable after 3pm weekdays.`,
     updatedAt: "2026-07-25",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     featured: false,
     related: ["handling-frustrated-users", "writing-useful-ticket-notes"],
     body: [
@@ -382,6 +387,7 @@ User is reachable after 3pm weekdays.`,
     updatedAt: "2026-08-07",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     featured: false,
     related: ["account-lockout-escalation", "password-reset-walkthrough"],
     body: [

@@ -22,6 +22,7 @@ export const flows: TroubleshootingFlow[] = [
     updatedAt: "2026-08-05",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     startNodeId: "device-type",
     nodes: [
       {
@@ -417,6 +418,7 @@ export const flows: TroubleshootingFlow[] = [
     updatedAt: "2026-08-06",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     startNodeId: "need-check",
     nodes: [
       {
@@ -716,6 +718,7 @@ export const flows: TroubleshootingFlow[] = [
     updatedAt: "2026-08-08",
     updatedBy: "Help Desk Leadership",
     revision: 3,
+    verification: "unverified",
     startNodeId: "security-triage",
     nodes: [
       {
@@ -984,6 +987,7 @@ export const flows: TroubleshootingFlow[] = [
     updatedAt: "2026-08-09",
     updatedBy: "Help Desk Leadership",
     revision: 2,
+    verification: "unverified",
     startNodeId: "appropriate",
     nodes: [
       {

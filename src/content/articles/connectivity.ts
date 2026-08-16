@@ -13,6 +13,7 @@ export const connectivityArticles: Article[] = [
     updatedAt: "2026-07-15",
     updatedBy: "Help Desk Leadership",
     revision: 5,
+    verification: "unverified",
     featured: true,
     related: ["vpn-connection-troubleshooting", "wireless-connection-basics"],
     body: [
@@ -71,6 +72,7 @@ export const connectivityArticles: Article[] = [
     updatedAt: "2026-08-06",
     updatedBy: "Help Desk Leadership",
     revision: 7,
+    verification: "unverified",
     featured: true,
     related: ["vpn-what-it-is", "wireless-connection-basics"],
     body: [
@@ -169,6 +171,7 @@ export const connectivityArticles: Article[] = [
     updatedAt: "2026-08-11",
     updatedBy: "Help Desk Leadership",
     revision: 4,
+    verification: "unverified",
     featured: false,
     related: ["vpn-connection-troubleshooting"],
     body: [

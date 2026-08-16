@@ -99,6 +99,17 @@ export const links: ImportantLink[] = [
     updatedAt: "2026-08-11",
   },
   {
+    key: "classroom-technology-page",
+    label: "Classroom Technology",
+    description:
+      "Per-room technology layouts. Check here to identify a room's configuration before giving a faculty member instructions over the phone.",
+    href: "#",
+    category: "hardware",
+    visibility: "staff",
+    pinned: false,
+    updatedAt: "2026-08-15",
+  },
+  {
     key: "escalation-directory",
     label: "Escalation Directory",
     description:
