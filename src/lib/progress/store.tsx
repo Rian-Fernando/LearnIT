@@ -126,12 +126,20 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const api = useMemo<ProgressApi>(
+  /**
+   * Actions are memoised separately from `state`, and deliberately do not
+   * depend on it.
+   *
+   * Every mutator below uses the functional updater form, so none of them needs
+   * to read `state` directly — which means their identities can stay stable for
+   * the lifetime of the provider. That matters: consumers list these in effect
+   * dependency arrays, and if a mutator's identity changed on every state
+   * change, any effect that both depends on it and calls it would re-trigger
+   * itself forever.
+   */
+  const actions = useMemo(
     () => ({
-      state,
-      ready,
-
-      completeStep(moduleSlug, stepId) {
+      completeStep(moduleSlug: string, stepId: string) {
         update((current) => {
           const trainingModule = current.modules[moduleSlug] ?? { completedSteps: [], checks: {} };
           if (trainingModule.completedSteps.includes(stepId)) return current;
@@ -148,7 +156,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         });
       },
 
-      uncompleteStep(moduleSlug, stepId) {
+      uncompleteStep(moduleSlug: string, stepId: string) {
         update((current) => {
           const trainingModule = current.modules[moduleSlug];
           if (!trainingModule) return current;
@@ -166,7 +174,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         });
       },
 
-      recordCheck(moduleSlug, checkId, correct) {
+      recordCheck(moduleSlug: string, checkId: string, correct: boolean) {
         update((current) => {
           const trainingModule = current.modules[moduleSlug] ?? { completedSteps: [], checks: {} };
           return {
@@ -185,7 +193,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         });
       },
 
-      markModuleComplete(moduleSlug, totalSteps) {
+      markModuleComplete(moduleSlug: string, totalSteps: number) {
         update((current) => {
           const trainingModule = current.modules[moduleSlug] ?? { completedSteps: [], checks: {} };
           if (trainingModule.completedSteps.length < totalSteps) return current;
@@ -200,7 +208,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         });
       },
 
-      recordScenario(slug, correct, total) {
+      recordScenario(slug: string, correct: number, total: number) {
         update((current) => ({
           ...current,
           scenarios: {
@@ -210,18 +218,32 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         }));
       },
 
-      noteVisit(moduleSlug, stepId) {
-        update((current) => ({
-          ...current,
-          lastVisited: { moduleSlug, stepId, at: new Date().toISOString() },
-        }));
+      noteVisit(moduleSlug: string, stepId: string) {
+        update((current) => {
+          // Bail out when nothing actually moved. Without this the call writes
+          // a fresh timestamp every time, producing a new state object on every
+          // render — which is a re-render loop waiting to happen.
+          const last = current.lastVisited;
+          if (last?.moduleSlug === moduleSlug && last?.stepId === stepId) {
+            return current;
+          }
+          return {
+            ...current,
+            lastVisited: { moduleSlug, stepId, at: new Date().toISOString() },
+          };
+        });
       },
 
       reset() {
         update(() => EMPTY);
       },
     }),
-    [state, ready, update],
+    [update],
+  );
+
+  const api = useMemo<ProgressApi>(
+    () => ({ state, ready, ...actions }),
+    [state, ready, actions],
   );
 
   return <ProgressContext.Provider value={api}>{children}</ProgressContext.Provider>;

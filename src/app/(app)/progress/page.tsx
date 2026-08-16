@@ -4,6 +4,7 @@ import type { ModuleCard } from "@/features/training/module-list";
 import { requireStaff } from "@/lib/auth";
 import { CATEGORY_LABELS } from "@/lib/content/schema";
 import { listModules, listScenarios } from "@/lib/content/repository";
+import { relativeDate } from "@/lib/format";
 
 export const metadata: Metadata = { title: "My progress" };
 
@@ -26,6 +27,7 @@ export default async function ProgressPage() {
     checkCount: module.steps.filter((step) => step.check).length,
     prerequisites: module.prerequisites,
     updatedAt: module.updatedAt,
+    updatedLabel: relativeDate(module.updatedAt),
   }));
 
   const scenarioTitles = Object.fromEntries(

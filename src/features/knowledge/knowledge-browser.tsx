@@ -6,7 +6,6 @@ import { ArrowRight, Search, X } from "lucide-react";
 import { EmptyState, Badge } from "@/components/ui/primitives";
 import { cn } from "@/lib/cn";
 import { CATEGORY_LABELS, type Category } from "@/lib/content/schema";
-import { relativeDate } from "@/lib/format";
 
 /**
  * Knowledge base browser.
@@ -27,6 +26,15 @@ export interface ArticleCard {
   category: Category;
   tags: string[];
   updatedAt: string;
+  /**
+   * Pre-formatted on the server.
+   *
+   * "3 days ago" depends on the current time, so computing it here would give
+   * one answer during server rendering and another at hydration — and on the
+   * statically generated demo pages, where the HTML is built once and served
+   * for weeks, they would diverge permanently.
+   */
+  updatedLabel: string;
   featured: boolean;
 }
 
@@ -152,7 +160,7 @@ export function KnowledgeBrowser({
                 </p>
 
                 <p className="mt-3 text-xs text-tertiary">
-                  Updated {relativeDate(article.updatedAt)}
+                  Updated {article.updatedLabel}
                 </p>
               </Link>
             </li>

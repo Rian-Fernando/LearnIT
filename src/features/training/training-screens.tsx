@@ -6,7 +6,7 @@ import { Badge, MetaLine } from "@/components/ui/primitives";
 import type { Viewer } from "@/lib/auth/types";
 import { CATEGORY_LABELS } from "@/lib/content/schema";
 import { buildLinkMap, getModule, listModules } from "@/lib/content/repository";
-import { formatDate, formatMinutes } from "@/lib/format";
+import { formatDate, formatMinutes, relativeDate } from "@/lib/format";
 import { ReportOutdated } from "@/features/feedback/report-outdated";
 import { ModuleList, type ModuleCard } from "./module-list";
 import { ModulePlayer } from "./module-player";
@@ -35,6 +35,7 @@ export async function TrainingIndexScreen({
     checkCount: trainingModule.steps.filter((step) => step.check).length,
     prerequisites: trainingModule.prerequisites,
     updatedAt: trainingModule.updatedAt,
+    updatedLabel: relativeDate(trainingModule.updatedAt),
   }));
 
   const totalMinutes = cards.reduce((sum, card) => sum + card.minutes, 0);

@@ -32,6 +32,7 @@ export async function KnowledgeIndexScreen({
     category: article.category,
     tags: article.tags,
     updatedAt: article.updatedAt,
+    updatedLabel: relativeDate(article.updatedAt),
     featured: article.featured,
   }));
 

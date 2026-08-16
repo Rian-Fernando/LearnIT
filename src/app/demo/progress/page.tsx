@@ -4,8 +4,14 @@ import type { ModuleCard } from "@/features/training/module-list";
 import { GUEST_VIEWER } from "@/lib/auth/types";
 import { CATEGORY_LABELS } from "@/lib/content/schema";
 import { listModules, listScenarios } from "@/lib/content/repository";
+import { relativeDate } from "@/lib/format";
 
-export const metadata: Metadata = { title: "My progress" };
+export const metadata: Metadata = {
+  title: "Onboarding progress",
+  description:
+    "How learnIT tracks onboarding completion for a Help Desk technician: modules finished, knowledge checks worth revisiting, and practice scenarios completed.",
+  alternates: { canonical: "/demo/progress" },
+};
 
 export default async function DemoProgressPage() {
   const [modules, scenarios] = await Promise.all([
@@ -24,6 +30,7 @@ export default async function DemoProgressPage() {
     checkCount: module.steps.filter((step) => step.check).length,
     prerequisites: module.prerequisites,
     updatedAt: module.updatedAt,
+    updatedLabel: relativeDate(module.updatedAt),
   }));
 
   const scenarioTitles = Object.fromEntries(

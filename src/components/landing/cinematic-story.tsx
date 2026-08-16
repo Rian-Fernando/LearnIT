@@ -36,7 +36,7 @@ export function CinematicStory() {
   return (
     <div ref={containerRef} className="relative" data-surface="cinematic">
       {/* ---- pinned stage ---- */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#08090b]">
+      <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0a0b09]">
         <CinematicCanvas
           progressRef={progressRef}
           className={cn(
@@ -49,11 +49,11 @@ export function CinematicStory() {
             field, without flattening the scene. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#08090b] via-[#08090b]/70 to-transparent lg:to-[#08090b]/10"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a0b09] via-[#0a0b09]/70 to-transparent lg:to-[#0a0b09]/10"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#08090b] to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0a0b09] to-transparent"
         />
 
         {/* ---- copy ---- */}
@@ -64,7 +64,7 @@ export function CinematicStory() {
                   entrance animation. */}
               <div key={act.id} className="animate-fade-up">
                 <div className="flex items-center gap-3">
-                  <span className="tabular font-mono text-xs tracking-[0.2em] text-[#e89f2c]">
+                  <span className="tabular font-mono text-xs tracking-[0.2em] text-[#c7f04a]">
                     {act.index}
                   </span>
                   <span aria-hidden className="h-px w-8 bg-white/20" />
@@ -155,8 +155,10 @@ function SystemCloud({ systems }: { systems: string[] }) {
       {systems.map((system, index) => {
         // Distributed around the right two thirds of the stage, away from copy.
         const angle = (index / systems.length) * Math.PI * 2;
-        const left = 62 + Math.cos(angle) * 26;
-        const top = 50 + Math.sin(angle) * 32;
+        // Rounded for the same reason as the static diagrams: trigonometric
+        // results differ between engines in the last digit.
+        const left = Math.round((62 + Math.cos(angle) * 26) * 100) / 100;
+        const top = Math.round((50 + Math.sin(angle) * 32) * 100) / 100;
         return (
           <span
             key={system}
@@ -187,7 +189,7 @@ function ActRail({ count, active }: { count: number; active: number }) {
           key={index}
           className={cn(
             "h-6 w-px transition-colors duration-500",
-            index === active ? "bg-[#e89f2c]" : "bg-white/15",
+            index === active ? "bg-[#c7f04a]" : "bg-white/15",
           )}
         />
       ))}

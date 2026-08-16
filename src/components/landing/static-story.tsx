@@ -117,6 +117,17 @@ function FormationDiagram({
   );
 }
 
+/**
+ * Round a computed coordinate before it reaches the DOM.
+ *
+ * `Math.sin` and `Math.cos` are not required by the spec to be correctly
+ * rounded, and Node and the browser genuinely disagree in the final
+ * floating-point digit — enough to render `14.966679003209201` on the server
+ * and `14.966679003209208` on the client, which React reports as a hydration
+ * mismatch. Two decimals is far more precision than a 320×120 diagram needs.
+ */
+const r = (n: number): number => Math.round(n * 100) / 100;
+
 /** Deterministic pseudo-random so the diagrams never shift between renders. */
 function seeded(seed: number) {
   let state = seed >>> 0;
@@ -127,8 +138,21 @@ function seeded(seed: number) {
 }
 
 function renderFormation(formation: Formation) {
-  const dot = (x: number, y: number, r: number, opacity: number, key: string) => (
-    <circle key={key} cx={x} cy={y} r={r} fill="currentColor" opacity={opacity} />
+  const dot = (
+    x: number,
+    y: number,
+    radius: number,
+    opacity: number,
+    key: string,
+  ) => (
+    <circle
+      key={key}
+      cx={r(x)}
+      cy={r(y)}
+      r={radius}
+      fill="currentColor"
+      opacity={r(opacity)}
+    />
   );
 
   switch (formation) {
@@ -165,8 +189,8 @@ function renderFormation(formation: Formation) {
                   key={`l${i}`}
                   x1={cx}
                   y1={cy}
-                  x2={cx + Math.cos(angle) * 140}
-                  y2={cy + Math.sin(angle) * 52}
+                  x2={r(cx + Math.cos(angle) * 140)}
+                  y2={r(cy + Math.sin(angle) * 52)}
                 />
               );
             })}
@@ -221,11 +245,11 @@ function renderFormation(formation: Formation) {
       const rows = 6;
       return (
         <g className="text-accent-text">
-          {Array.from({ length: rows }, (_, r) =>
+          {Array.from({ length: rows }, (_, row) =>
             Array.from({ length: cols }, (_, c) => {
               const x = 18 + c * ((320 - 36) / (cols - 1));
-              const y = 22 + r * ((120 - 44) / (rows - 1));
-              return dot(x, y, 1.35, 0.55, `g${r}-${c}`);
+              const y = 22 + row * ((120 - 44) / (rows - 1));
+              return dot(x, y, 1.35, 0.55, `g${row}-${c}`);
             }),
           )}
         </g>
@@ -243,7 +267,7 @@ function renderFormation(formation: Formation) {
           {Array.from({ length: panels }, (_, i) => (
             <rect
               key={`p${i}`}
-              x={start + i * (width + gap)}
+              x={r(start + i * (width + gap))}
               y={22}
               width={width}
               height={76}
@@ -257,7 +281,7 @@ function renderFormation(formation: Formation) {
           {Array.from({ length: panels }, (_, i) => (
             <rect
               key={`b${i}`}
-              x={start + i * (width + gap) + 10}
+              x={r(start + i * (width + gap) + 10)}
               y={36}
               width={width - 20}
               height={3}

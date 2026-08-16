@@ -5,6 +5,7 @@ import { CheckCircle2, Flag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge, EmptyState, Surface } from "@/components/ui/primitives";
 import type { ContentReport } from "@/lib/content/schema";
+import { formatDate } from "@/lib/format";
 import { setReportStatus, type ActionResult } from "./actions";
 
 /**
@@ -113,11 +114,11 @@ function Group({
                   {report.resourceType} · {report.resourceSlug}
                 </span>
                 <span className="ml-auto text-xs text-tertiary">
-                  {report.reportedBy} ·{" "}
-                  {new Date(report.reportedAt).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                  })}
+                  {/* `reportedAt` is a full ISO timestamp; slicing to the date
+                      and formatting in UTC keeps server and client output
+                      identical. `toLocaleDateString` would use the renderer's
+                      own timezone and produce a hydration mismatch. */}
+                  {report.reportedBy} · {formatDate(report.reportedAt.slice(0, 10))}
                 </span>
               </div>
 

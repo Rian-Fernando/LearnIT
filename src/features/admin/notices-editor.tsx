@@ -18,19 +18,26 @@ import { publishAnnouncement, removeAnnouncement, type ActionResult } from "./ac
 export function NoticesEditor({
   authored,
   published,
+  today,
+  defaultExpiry,
 }: {
   authored: Announcement[];
   published: Announcement[];
+  /**
+   * Both dates are computed on the server and passed in.
+   *
+   * They are rendered as the `min` and `defaultValue` *attributes* of a date
+   * input. Computing them here would produce one value during server rendering
+   * and another at hydration, which is exactly the attribute mismatch React
+   * refuses to patch up.
+   */
+  today: string;
+  defaultExpiry: string;
 }) {
   const [result, action, pending] = useActionState<ActionResult | null, FormData>(
     publishAnnouncement,
     null,
   );
-
-  const today = new Date().toISOString().slice(0, 10);
-  const defaultExpiry = new Date(Date.now() + 30 * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
