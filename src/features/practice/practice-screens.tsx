@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Terminal } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Badge, EmptyState, MetaLine } from "@/components/ui/primitives";
+import { Badge, EmptyState, MetaLine, SectionHeading } from "@/components/ui/primitives";
 import type { Viewer } from "@/lib/auth/types";
 import { CATEGORY_LABELS } from "@/lib/content/schema";
 import { buildLinkMap, getScenario, listArticles, listScenarios } from "@/lib/content/repository";
 import { formatDate } from "@/lib/format";
 import { ScenarioRunner } from "./scenario-runner";
+import { SimulatorList } from "@/features/simulator/simulator-screens";
 import { ScenarioStatus } from "./scenario-status";
 
 const DIFFICULTY = {
@@ -34,8 +35,18 @@ export async function PracticeIndexScreen({
       <PageHeader
         eyebrow="Practice"
         title="Realistic tickets, with feedback"
-        description="Work a ticket the way you would on shift — decide what to collect, what to check, and when to escalate. Every option explains the reasoning, including the ones that are wrong."
-        meta={<MetaLine items={[`${scenarios.length} scenarios`]} />}
+        description="Two kinds of practice. The simulator has you write a real ticket from a call and grades it. The decision scenarios drill single judgement calls."
+        meta={<MetaLine items={[`${scenarios.length} decision scenarios`]} />}
+      />
+
+      <section className="mb-12">
+        <SimulatorList viewer={viewer} basePath={basePath} />
+      </section>
+
+      <SectionHeading
+        className="mb-4"
+        title="Decision scenarios"
+        description="Shorter exercises focused on a single judgement call, with feedback on every option."
       />
 
       {scenarios.length === 0 ? (
