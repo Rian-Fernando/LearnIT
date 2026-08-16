@@ -20,6 +20,20 @@ next-env.d.ts
 .env.*.local
 !.env.example
 
+# ---------------------------------------------------------------------------
+# Reference material — NEVER COMMIT
+# ---------------------------------------------------------------------------
+# Working folder for raw Adelphi screenshots and exports used while authoring
+# content. These contain real internal system structure and, in some cases,
+# real personal data (names, AUIDs, directory attributes, group membership).
+#
+# Sanitised, fictional recreations belong in `public/reference/` and are the
+# only images that may be committed. See docs/security.md.
+/Screenshots/
+/screenshots/
+*.raw.png
+*.raw.pdf
+
 # misc
 .DS_Store
 *.pem
