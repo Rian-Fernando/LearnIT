@@ -8,13 +8,19 @@ import type { Role } from "@/lib/content/schema";
  * application only ever sees a `HelpDeskUser`; how that user is proven is the
  * job of an `IdentityProvider` implementation.
  *
- * Today the shipped implementations are:
- *   mock — seeded personas for local development and the public demo.
- *   oidc — Authorization Code + PKCE against Adelphi's approved IdP.
+ * Shipped implementations:
+ *   mock       — seeded personas for local development and the public demo.
+ *   google     — Google / Google Workspace, via OIDC.
+ *   microsoft  — Microsoft Entra ID (Office 365), via OIDC.
+ *   oidc       — any other conformant provider, configured generically.
  *
- * Swapping providers is an environment change (`AUTH_PROVIDER`), not a code
- * change. See docs/authentication.md.
+ * More than one can be enabled at once (`AUTH_PROVIDERS="google,microsoft"`),
+ * which is what makes migrating between them a configuration change rather
+ * than a cutover. See docs/authentication.md.
  */
+
+/** Identifier for an identity provider. Recorded in the session. */
+export type ProviderId = "mock" | "google" | "microsoft" | "oidc";
 
 export interface HelpDeskUser {
   /** Stable subject identifier from the identity provider. Opaque to the app. */
@@ -34,8 +40,9 @@ export interface HelpDeskUser {
 
 export interface Session {
   user: HelpDeskUser;
-  /** Which provider issued this session — surfaced in the admin audit view. */
-  provider: "mock" | "oidc";
+  /** Which provider issued this session. A session from a provider that has
+   *  since been disabled is no longer honoured. */
+  provider: ProviderId;
   /** Unix seconds. */
   issuedAt: number;
   expiresAt: number;
@@ -70,7 +77,7 @@ export interface SignInStart {
 }
 
 export interface IdentityProvider {
-  readonly id: "mock" | "oidc";
+  readonly id: ProviderId;
   /** Human-readable name for the sign-in screen. */
   readonly displayName: string;
 

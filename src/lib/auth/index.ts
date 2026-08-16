@@ -1,11 +1,8 @@
 import "server-only";
 import { redirect } from "next/navigation";
-import { env } from "@/lib/config/env";
 import { ROLE_RANK, type Role } from "@/lib/content/schema";
-import { mockProvider } from "./providers/mock";
-import { oidcProvider } from "./providers/oidc";
 import { getViewer } from "./session";
-import type { HelpDeskUser, IdentityProvider, Viewer } from "./types";
+import type { HelpDeskUser, Viewer } from "./types";
 
 export * from "./types";
 export {
@@ -16,10 +13,7 @@ export {
   sanitizeReturnTo,
 } from "./session";
 
-/** The configured identity provider for this deployment. */
-export function identityProvider(): IdentityProvider {
-  return env().AUTH_PROVIDER === "oidc" ? oidcProvider : mockProvider;
-}
+export { enabledProviders, providerById } from "./providers/registry";
 
 /* -------------------------------------------------------------------------- */
 /* Authorization                                                              */

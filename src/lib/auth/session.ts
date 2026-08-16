@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { z } from "zod";
 import { env, sessionSecret } from "@/lib/config/env";
+import { providerIsEnabled } from "./providers/registry";
 import { GUEST_VIEWER, type HelpDeskUser, type Session, type Viewer } from "./types";
 
 /**
@@ -27,7 +28,7 @@ const ClaimsSchema = z.object({
   role: z.enum(["staff", "admin"]),
   title: z.string().optional(),
   startedAt: z.string().optional(),
-  provider: z.enum(["mock", "oidc"]),
+  provider: z.enum(["mock", "google", "microsoft", "oidc"]),
   iat: z.number(),
   exp: z.number(),
 });
@@ -92,9 +93,10 @@ export async function getSession(): Promise<Session | null> {
 
     const claims = ClaimsSchema.parse(payload);
 
-    // A session minted by the mock provider must never be honoured by a
-    // deployment that has since been switched to real SSO.
-    if (claims.provider !== env().AUTH_PROVIDER) return null;
+    // A session minted by a provider this deployment no longer offers must
+    // not be honoured — most importantly, a mock session after a switch to
+    // real single sign-on.
+    if (!providerIsEnabled(claims.provider)) return null;
 
     return {
       user: {

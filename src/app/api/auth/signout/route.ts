@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { destroySession, identityProvider } from "@/lib/auth";
+import { destroySession, enabledProviders, getSession } from "@/lib/auth";
 
 /**
  * Ends the session.
@@ -16,9 +16,14 @@ export async function POST(request: NextRequest) {
     return new NextResponse("Cross-origin request refused", { status: 403 });
   }
 
+  // Ask the issuing provider for a single-logout URL before clearing the
+  // session, since we need to know which provider issued it.
+  const session = await getSession();
+  const issuer = enabledProviders().find((p) => p.id === session?.provider);
+  const idpLogout = issuer?.signOutUrl({ returnTo: "/" }) ?? null;
+
   await destroySession();
 
-  const idpLogout = identityProvider().signOutUrl({ returnTo: "/" });
   return NextResponse.redirect(new URL(idpLogout ?? "/", request.url), {
     // 303 so the browser follows with GET after the POST.
     status: 303,

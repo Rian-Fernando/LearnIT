@@ -1,18 +1,31 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { identityProvider, sanitizeReturnTo } from "@/lib/auth";
+import { enabledProviders, providerById, sanitizeReturnTo } from "@/lib/auth";
 import { saveTransaction } from "@/lib/auth/session";
 
 /**
- * Begins authentication.
+ * Begins authentication with a named provider.
  *
- * With the OIDC provider this redirects to Adelphi's identity provider. With
- * the mock provider it redirects to the local persona picker. The route is
- * identical either way, which is the point of the abstraction — nothing outside
- * `src/lib/auth/providers` knows which is configured.
+ * `?provider=google` selects which of the enabled providers to use. When the
+ * parameter is absent and only one provider is configured, that one is used —
+ * so a single-provider deployment needs no parameter at all.
  */
 export async function GET(request: NextRequest) {
   const returnTo = sanitizeReturnTo(request.nextUrl.searchParams.get("returnTo"));
-  const provider = identityProvider();
+  const requested = request.nextUrl.searchParams.get("provider");
+
+  const available = enabledProviders();
+  const provider = requested
+    ? providerById(requested)
+    : (available.length === 1 ? available[0]! : null);
+
+  if (!provider) {
+    // An unknown or ambiguous provider sends the visitor back to the chooser
+    // rather than guessing on their behalf.
+    const chooser = new URL("/signin", request.url);
+    chooser.searchParams.set("returnTo", returnTo);
+    if (requested) chooser.searchParams.set("error", "unknown_provider");
+    return NextResponse.redirect(chooser);
+  }
 
   try {
     const start = await provider.beginSignIn({ returnTo });

@@ -14,11 +14,25 @@ const booleanish = z
   .optional()
   .transform((v) => v === "true" || v === "1");
 
+const ProviderIdSchema = z.enum(["mock", "google", "microsoft", "oidc"]);
+
+/** Comma-separated provider list, e.g. `google,microsoft`. */
+const providerList = z
+  .string()
+  .default("mock")
+  .transform((raw) =>
+    raw
+      .split(",")
+      .map((entry) => entry.trim().toLowerCase())
+      .filter(Boolean),
+  )
+  .pipe(z.array(ProviderIdSchema).min(1));
+
 const EnvSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
-    NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
+    NEXT_PUBLIC_SITE_URL: z.string().url().default("https://learnit.rianfernando.com"),
 
     /**
      * Optional at parse time, mandatory at use time — see `sessionSecret()`.
@@ -36,16 +50,42 @@ const EnvSchema = z
       .optional(),
     SESSION_MAX_AGE: z.coerce.number().int().positive().default(60 * 60 * 8),
 
-    AUTH_PROVIDER: z.enum(["mock", "oidc"]).default("mock"),
+    /* ---------------------------------------------------------------- auth */
+
+    AUTH_PROVIDERS: providerList,
     AUTH_ALLOW_MOCK_IN_PRODUCTION: booleanish,
 
+    /** Claim carrying group membership. Entra ID uses `groups`. */
+    AUTH_GROUPS_CLAIM: z.string().default("groups"),
+    AUTH_ADMIN_GROUP: z.string().optional(),
+    AUTH_STAFF_GROUP: z.string().optional(),
+
+    /**
+     * Allowlists, for providers that do not expose group membership.
+     * Google Workspace does not put groups in the ID token, so domain and
+     * email allowlists are the mechanism there.
+     */
+    AUTH_ADMIN_EMAILS: z.string().optional(),
+    AUTH_STAFF_EMAILS: z.string().optional(),
+    AUTH_ALLOWED_DOMAINS: z.string().optional(),
+    /** Entra tenant ids permitted to sign in. A hard gate when set. */
+    AUTH_ALLOWED_TENANTS: z.string().optional(),
+
+    GOOGLE_CLIENT_ID: z.string().optional(),
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
+
+    MICROSOFT_CLIENT_ID: z.string().optional(),
+    MICROSOFT_CLIENT_SECRET: z.string().optional(),
+    /** Tenant id, or `common` for multi-tenant. */
+    MICROSOFT_TENANT_ID: z.string().optional(),
+
+    OIDC_DISPLAY_NAME: z.string().default("single sign-on"),
     OIDC_ISSUER: z.string().optional(),
     OIDC_CLIENT_ID: z.string().optional(),
     OIDC_CLIENT_SECRET: z.string().optional(),
     OIDC_SCOPES: z.string().default("openid profile email"),
-    OIDC_GROUPS_CLAIM: z.string().default("groups"),
-    OIDC_ADMIN_GROUP: z.string().optional(),
-    OIDC_STAFF_GROUP: z.string().optional(),
+
+    /* ------------------------------------------------------------- content */
 
     CONTENT_ADAPTER: z.enum(["file", "postgres"]).default("file"),
     DATABASE_URL: z.string().optional(),
@@ -54,16 +94,17 @@ const EnvSchema = z
   })
   .superRefine((env, ctx) => {
     const isProd = env.NODE_ENV === "production";
+    const usesMock = env.AUTH_PROVIDERS.includes("mock");
 
     // The single most important guard in the application: a production
     // deployment must not accept mock personas unless it has been explicitly
     // and knowingly opted in (the public portfolio build).
-    if (isProd && env.AUTH_PROVIDER === "mock" && !env.AUTH_ALLOW_MOCK_IN_PRODUCTION) {
+    if (isProd && usesMock && !env.AUTH_ALLOW_MOCK_IN_PRODUCTION) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["AUTH_PROVIDER"],
+        path: ["AUTH_PROVIDERS"],
         message:
-          'AUTH_PROVIDER="mock" is not permitted in production. Configure the approved identity provider (AUTH_PROVIDER="oidc"), or set AUTH_ALLOW_MOCK_IN_PRODUCTION="true" if this is the sanitised public demo.',
+          'The "mock" provider is not permitted in production. Configure a real provider (AUTH_PROVIDERS="google" or "microsoft"), or set AUTH_ALLOW_MOCK_IN_PRODUCTION="true" if this is the sanitised public demo.',
       });
     }
 
@@ -77,16 +118,41 @@ const EnvSchema = z
       });
     }
 
-    if (env.AUTH_PROVIDER === "oidc") {
-      for (const key of ["OIDC_ISSUER", "OIDC_CLIENT_ID", "OIDC_CLIENT_SECRET"] as const) {
+    const requiredFor: Record<string, readonly (keyof typeof env)[]> = {
+      google: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+      microsoft: ["MICROSOFT_CLIENT_ID", "MICROSOFT_CLIENT_SECRET"],
+      oidc: ["OIDC_ISSUER", "OIDC_CLIENT_ID", "OIDC_CLIENT_SECRET"],
+    };
+
+    for (const provider of env.AUTH_PROVIDERS) {
+      for (const key of requiredFor[provider] ?? []) {
         if (!env[key]) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: [key],
-            message: `${key} is required when AUTH_PROVIDER="oidc".`,
+            path: [key as string],
+            message: `${String(key)} is required when "${provider}" is in AUTH_PROVIDERS.`,
           });
         }
       }
+    }
+
+    // A real provider with no way to authorise anyone would let every account
+    // that can sign in be refused — which looks like a broken deployment.
+    const hasRealProvider = env.AUTH_PROVIDERS.some((p) => p !== "mock");
+    const hasRoleRule =
+      env.AUTH_ADMIN_GROUP ||
+      env.AUTH_STAFF_GROUP ||
+      env.AUTH_ADMIN_EMAILS ||
+      env.AUTH_STAFF_EMAILS ||
+      env.AUTH_ALLOWED_DOMAINS;
+
+    if (hasRealProvider && !hasRoleRule) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["AUTH_ALLOWED_DOMAINS"],
+        message:
+          "No authorisation rule is configured, so every sign-in would be refused. Set at least one of AUTH_ALLOWED_DOMAINS, AUTH_ADMIN_EMAILS, AUTH_STAFF_EMAILS, AUTH_ADMIN_GROUP, or AUTH_STAFF_GROUP.",
+      });
     }
 
     if (env.CONTENT_ADAPTER === "postgres" && !env.DATABASE_URL) {
@@ -108,15 +174,29 @@ function load(): Env {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     SESSION_SECRET: process.env.SESSION_SECRET,
     SESSION_MAX_AGE: process.env.SESSION_MAX_AGE,
-    AUTH_PROVIDER: process.env.AUTH_PROVIDER,
+
+    AUTH_PROVIDERS: process.env.AUTH_PROVIDERS,
     AUTH_ALLOW_MOCK_IN_PRODUCTION: process.env.AUTH_ALLOW_MOCK_IN_PRODUCTION,
+    AUTH_GROUPS_CLAIM: process.env.AUTH_GROUPS_CLAIM,
+    AUTH_ADMIN_GROUP: process.env.AUTH_ADMIN_GROUP,
+    AUTH_STAFF_GROUP: process.env.AUTH_STAFF_GROUP,
+    AUTH_ADMIN_EMAILS: process.env.AUTH_ADMIN_EMAILS,
+    AUTH_STAFF_EMAILS: process.env.AUTH_STAFF_EMAILS,
+    AUTH_ALLOWED_DOMAINS: process.env.AUTH_ALLOWED_DOMAINS,
+    AUTH_ALLOWED_TENANTS: process.env.AUTH_ALLOWED_TENANTS,
+
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID,
+    MICROSOFT_CLIENT_SECRET: process.env.MICROSOFT_CLIENT_SECRET,
+    MICROSOFT_TENANT_ID: process.env.MICROSOFT_TENANT_ID,
+
+    OIDC_DISPLAY_NAME: process.env.OIDC_DISPLAY_NAME,
     OIDC_ISSUER: process.env.OIDC_ISSUER,
     OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
     OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
     OIDC_SCOPES: process.env.OIDC_SCOPES,
-    OIDC_GROUPS_CLAIM: process.env.OIDC_GROUPS_CLAIM,
-    OIDC_ADMIN_GROUP: process.env.OIDC_ADMIN_GROUP,
-    OIDC_STAFF_GROUP: process.env.OIDC_STAFF_GROUP,
+
     CONTENT_ADAPTER: process.env.CONTENT_ADAPTER,
     DATABASE_URL: process.env.DATABASE_URL,
     NEXT_PUBLIC_DEMO_MODE: process.env.NEXT_PUBLIC_DEMO_MODE,
@@ -140,6 +220,11 @@ export function env(): Env {
 /** True when the deployment must only ever serve sanitised, public content. */
 export function isDemoMode(): boolean {
   return env().NEXT_PUBLIC_DEMO_MODE;
+}
+
+/** Canonical origin. Every absolute URL in the app derives from this. */
+export function siteUrl(): string {
+  return env().NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
 }
 
 /** Development-only signing key, so `npm run dev` works on a fresh clone. */

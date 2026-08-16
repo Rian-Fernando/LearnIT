@@ -7,8 +7,8 @@ import { AuthError, type HelpDeskUser, type IdentityProvider } from "../types";
  * Exists so learnIT can be developed, demonstrated, and reviewed before
  * Adelphi IT registers the application with the approved identity provider.
  * It performs NO credential verification — a persona is chosen from a fixed
- * list. `src/lib/config/env.ts` refuses to boot a production deployment using
- * this provider unless it is explicitly the sanitised public demo.
+ * list. `src/lib/config/env.ts` refuses to boot a production deployment that
+ * enables this provider unless it is explicitly the sanitised public demo.
  *
  * The personas below are fictional. Any resemblance to Adelphi staff is
  * unintentional; see docs/security.md.
@@ -61,7 +61,7 @@ export const mockProvider: IdentityProvider = {
     // The persona picker is a real page rather than an external redirect.
     return {
       redirectTo: `/signin?returnTo=${encodeURIComponent(returnTo)}`,
-      transaction: { returnTo },
+      transaction: { returnTo, provider: "mock" },
     };
   },
 
