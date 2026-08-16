@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, CircleCheck, CircleDashed, CirclePlay } from "lucide-react";
 import { Badge, ProgressBar, Surface } from "@/components/ui/primitives";
 import { cn } from "@/lib/cn";
-import { formatMinutes, relativeDate } from "@/lib/format";
+import { formatMinutes } from "@/lib/format";
 import { summariseModule, useProgress } from "@/lib/progress/store";
 
 /**
@@ -26,6 +26,8 @@ export interface ModuleCard {
   checkCount: number;
   prerequisites: string[];
   updatedAt: string;
+  /** Pre-formatted on the server — see the note in `knowledge-browser.tsx`. */
+  updatedLabel: string;
 }
 
 export function ModuleList({
@@ -70,7 +72,7 @@ export function ModuleList({
               />
             </div>
 
-            <Surface interactive as="div" className="mb-3 min-w-0 flex-1 p-5">
+            <Surface interactive className="mb-3 min-w-0 flex-1 p-5">
               <Link
                 href={`${basePath}/training/${module.slug}`}
                 className="block focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -99,7 +101,7 @@ export function ModuleList({
                   {module.checkCount > 0
                     ? ` · ${module.checkCount} knowledge check${module.checkCount === 1 ? "" : "s"}`
                     : ""}{" "}
-                  · updated {relativeDate(module.updatedAt)}
+                  · updated {module.updatedLabel}
                 </p>
               </Link>
 

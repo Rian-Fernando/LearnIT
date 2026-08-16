@@ -31,10 +31,10 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // `three` ships untranspiled ESM examples; keep the client bundle lean by
-  // letting Next optimise the barrel imports we actually use.
+  // lucide-react is a large barrel; letting Next tree-shake it keeps the
+  // client bundle lean.
   experimental: {
-    optimizePackageImports: ["@react-three/drei", "lucide-react"],
+    optimizePackageImports: ["lucide-react"],
   },
 
   async headers() {

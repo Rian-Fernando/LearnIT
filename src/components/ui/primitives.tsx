@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 /* ========================================================================== *
@@ -7,20 +7,26 @@ import { cn } from "@/lib/cn";
  * gradients, no heavy radii, no drop shadows stacked on drop shadows.
  * ========================================================================== */
 
+/**
+ * Rendered as a plain `<div>`.
+ *
+ * This was briefly polymorphic via an `as` prop, but every call site passed a
+ * div, and React 19's stricter `ElementType` makes an unconstrained polymorphic
+ * component genuinely awkward to type. Semantic grouping is expressed by the
+ * surrounding element instead, which is where it belongs.
+ */
 export function Surface({
-  as: Tag = "div",
   className,
   interactive = false,
   children,
   ...rest
 }: {
-  as?: ElementType;
   className?: string;
   interactive?: boolean;
   children: ReactNode;
 } & Omit<ComponentPropsWithoutRef<"div">, "className" | "children">) {
   return (
-    <Tag
+    <div
       {...rest}
       className={cn(
         "rounded-xl border border-subtle bg-surface-raised",
@@ -30,7 +36,7 @@ export function Surface({
       )}
     >
       {children}
-    </Tag>
+    </div>
   );
 }
 

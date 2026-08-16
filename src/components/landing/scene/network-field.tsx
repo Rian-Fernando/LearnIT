@@ -98,7 +98,7 @@ export function NetworkField({
   progressRef,
   quality,
 }: {
-  progressRef: React.MutableRefObject<number>;
+  progressRef: React.RefObject<number>;
   quality: "high" | "modest";
 }) {
   const pointsRef = useRef<THREE.Points>(null);
@@ -140,8 +140,8 @@ export function NetworkField({
       uTime: { value: 0 },
       uProgress: { value: 0 },
       uPixelRatio: { value: 1 },
-      uColorCore: { value: new THREE.Color("#cfd6e4") },
-      uColorAccent: { value: new THREE.Color("#e89f2c") },
+      uColorCore: { value: new THREE.Color("#dfe4d8") },
+      uColorAccent: { value: new THREE.Color("#c7f04a") },
       uAccentMix: { value: 0 },
     }),
     [],
@@ -194,7 +194,7 @@ export function NetworkField({
     uniforms.uTime.value = state.clock.elapsedTime;
     uniforms.uProgress.value = p;
     uniforms.uPixelRatio.value = Math.min(state.gl.getPixelRatio(), 2);
-    // Warmth arrives with learnIT: the field shifts from cold data to brand gold
+    // The field shifts from a cold, undifferentiated grey to the brand lime
     // exactly as the story turns from problem to product.
     uniforms.uAccentMix.value = THREE.MathUtils.smoothstep(p, 0.52, 0.86);
 
@@ -250,7 +250,7 @@ export function NetworkField({
         </bufferGeometry>
         <lineBasicMaterial
           ref={lineMaterialRef}
-          color="#7f93b5"
+          color="#93a386"
           transparent
           opacity={0}
           depthWrite={false}

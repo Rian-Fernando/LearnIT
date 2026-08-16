@@ -19,9 +19,9 @@ import { useEffect, useRef, useState } from "react";
 
 export interface ScrollProgress {
   /** Live value, updated outside React. Read from a render loop. */
-  ref: React.MutableRefObject<number>;
+  ref: React.RefObject<number>;
   /** Attach to the tall scroll container. */
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function useScrollProgress(): ScrollProgress {

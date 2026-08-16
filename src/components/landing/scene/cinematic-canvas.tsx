@@ -21,7 +21,7 @@ export function CinematicCanvas({
   progressRef,
   className,
 }: {
-  progressRef: React.MutableRefObject<number>;
+  progressRef: React.RefObject<number>;
   className?: string;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
