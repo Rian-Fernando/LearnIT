@@ -20,15 +20,27 @@
 import {
   announcements,
   articles,
+  backlog,
+  checklists,
   flows,
   links,
   modules,
+  principles,
   responses,
   scenarios,
+  simulations,
+  taxonomies,
+  tickets,
 } from "../src/content";
 import {
   AnnouncementSchema,
   ArticleSchema,
+  BacklogItemSchema,
+  ChecklistSchema,
+  PrincipleSchema,
+  ReferenceTicketSchema,
+  TaxonomySchema,
+  TicketSimulationSchema,
   ImportantLinkSchema,
   QuickResponseSchema,
   ScenarioSchema,
@@ -40,6 +52,7 @@ import { z } from "zod";
 
 const problems: string[] = [];
 const warnings: string[] = [];
+let placeholderCount = 0;
 
 const fail = (msg: string) => problems.push(msg);
 const warn = (msg: string) => warnings.push(msg);
@@ -78,6 +91,10 @@ function assertUnique(label: string, ids: string[]): void {
 /* -------------------------------------------------------------------------- */
 
 const articleSlugs = new Set(articles.map((a) => a.slug));
+const checklistSlugs = new Set(checklists.map((c) => c.slug));
+const ticketSlugs = new Set(tickets.map((t) => t.slug));
+const principleIds = new Set(principles.map((p) => p.id));
+const backlogIds = new Set(backlog.map((b) => b.id));
 const responseSlugs = new Set(responses.map((r) => r.slug));
 const linkKeys = new Set(links.map((l) => l.key));
 const moduleSlugs = new Set(modules.map((m) => m.slug));
@@ -124,6 +141,29 @@ function checkBlocks(where: string, ownerVisibility: string, blocks: Block[]): v
         break;
       case "image":
         if (!block.alt.trim()) fail(`${where}: image block has empty alt text`);
+        break;
+      case "checklistRef":
+        if (!checklistSlugs.has(block.slug)) {
+          fail(`${where}: checklistRef → unknown checklist "${block.slug}"`);
+        }
+        break;
+      case "ticketRef":
+        if (!ticketSlugs.has(block.slug)) {
+          fail(`${where}: ticketRef → unknown reference ticket "${block.slug}"`);
+        }
+        break;
+      case "principle":
+        if (!principleIds.has(block.id)) {
+          fail(`${where}: principle → unknown principle "${block.id}"`);
+        }
+        break;
+      case "placeholder":
+        // A placeholder with nothing listed cannot be acted on, and quietly
+        // becomes permanent.
+        if (block.needs.length === 0) {
+          warn(`${where}: placeholder "${block.label}" lists nothing that is needed`);
+        }
+        placeholderCount += 1;
         break;
       default:
         break;
@@ -205,6 +245,12 @@ function checkFlow(flow: (typeof flows)[number]): void {
 /* -------------------------------------------------------------------------- */
 
 parseAll("article", ArticleSchema, articles);
+parseAll("checklist", ChecklistSchema, checklists);
+parseAll("reference ticket", ReferenceTicketSchema, tickets);
+parseAll("simulation", TicketSimulationSchema, simulations);
+parseAll("taxonomy", TaxonomySchema, taxonomies);
+parseAll("backlog item", BacklogItemSchema, backlog);
+parseAll("principle", PrincipleSchema, principles);
 parseAll("module", TrainingModuleSchema, modules);
 parseAll("flow", TroubleshootingFlowSchema, flows);
 parseAll("response", QuickResponseSchema, responses);
@@ -213,6 +259,12 @@ parseAll("link", ImportantLinkSchema, links);
 parseAll("announcement", AnnouncementSchema, announcements);
 
 assertUnique("articles", articles.map((a) => a.slug));
+assertUnique("checklists", checklists.map((c) => c.slug));
+assertUnique("reference tickets", tickets.map((t) => t.slug));
+assertUnique("simulations", simulations.map((s) => s.slug));
+assertUnique("taxonomies", taxonomies.map((t) => t.key));
+assertUnique("backlog", backlog.map((b) => b.id));
+assertUnique("principles", principles.map((p) => p.id));
 assertUnique("modules", modules.map((m) => m.slug));
 assertUnique("flows", flows.map((f) => f.slug));
 assertUnique("responses", responses.map((r) => r.slug));
@@ -263,6 +315,119 @@ for (const trainingModule of modules) {
 
 for (const flow of flows) checkFlow(flow);
 
+for (const checklist of checklists) {
+  const where = `checklist "${checklist.slug}"`;
+  assertUnique(
+    `${where} items`,
+    checklist.groups.flatMap((group) => group.items.map((item) => item.id)),
+  );
+}
+
+for (const simulation of simulations) {
+  const where = `simulation "${simulation.slug}"`;
+  checkBlocks(where, simulation.visibility, simulation.debrief);
+  assertUnique(`${where} rubric`, simulation.rubric.map((r) => r.id));
+
+  for (const item of simulation.rubric) {
+    // A rubric item with neither a pattern nor keywords can never be earned,
+    // which silently caps the achievable score.
+    if (!item.pattern && item.anyOf.length === 0 && item.target !== "notifications") {
+      fail(`${where} rubric "${item.id}": has no pattern and no keywords, so it can never pass`);
+    }
+    if (item.pattern) {
+      try {
+        new RegExp(item.pattern);
+      } catch {
+        fail(`${where} rubric "${item.id}": invalid regular expression`);
+      }
+    }
+    if (item.target === "notifications" && !item.expectNotification) {
+      fail(`${where} rubric "${item.id}": targets notifications but declares no expected state`);
+    }
+  }
+
+  // The model answer must itself score full marks — otherwise the exercise
+  // teaches one thing and rewards another.
+  const model = {
+    title: simulation.modelAnswer.title,
+    category: simulation.modelAnswer.category,
+    assignee: simulation.modelAnswer.assignee,
+    description: simulation.modelAnswer.description,
+    notifyAssignees: simulation.modelAnswer.notifyAssignees,
+    notifyContact: simulation.modelAnswer.notifyContact,
+  };
+  for (const item of simulation.rubric) {
+    let ok = false;
+    if (item.target === "notifications") {
+      ok =
+        !!item.expectNotification &&
+        model.notifyAssignees === item.expectNotification.assignees &&
+        model.notifyContact === item.expectNotification.contact;
+    } else {
+      const value =
+        item.target === "title"
+          ? model.title
+          : item.target === "category"
+            ? model.category
+            : item.target === "assignee"
+              ? model.assignee
+              : model.description;
+      ok = item.pattern
+        ? new RegExp(item.pattern, "i").test(value)
+        : item.anyOf.some((n) => value.toLowerCase().includes(n.toLowerCase()));
+    }
+    if (!ok) {
+      fail(`${where}: the model answer fails its own rubric item "${item.id}"`);
+    }
+  }
+
+  // Every option the form offers must be selectable, and the expected answer
+  // must be among them.
+  if (!simulation.categoryOptions.includes(simulation.modelAnswer.category)) {
+    fail(`${where}: model category "${simulation.modelAnswer.category}" is not in categoryOptions`);
+  }
+  if (!simulation.assigneeOptions.includes(simulation.modelAnswer.assignee)) {
+    fail(`${where}: model assignee "${simulation.modelAnswer.assignee}" is not in assigneeOptions`);
+  }
+}
+
+for (const ticket of tickets) {
+  const where = `reference ticket "${ticket.slug}"`;
+  for (const slug of ticket.articleSlugs) {
+    if (!articleSlugs.has(slug)) fail(`${where}: unknown article "${slug}"`);
+  }
+  // A worked example whose title does not follow the documented format would
+  // teach the wrong thing more effectively than any prose.
+  if (!/ {2}[A-Z0-9]+$/.test(ticket.fields.title)) {
+    warn(
+      `${where}: title "${ticket.fields.title}" does not end with two spaces and an uppercase username`,
+    );
+  }
+}
+
+// Every backlog item should be reachable from the content it blocks, and every
+// referenced slug should exist — otherwise the backlog drifts out of step with
+// the placeholders it is meant to track.
+const allSlugs = new Set([
+  ...articleSlugs,
+  ...moduleSlugs,
+  ...flows.map((f) => f.slug),
+  ...responses.map((r) => r.slug),
+  ...scenarios.map((s) => s.slug),
+  ...checklistSlugs,
+  ...ticketSlugs,
+  ...links.map((l) => l.key),
+  ...taxonomies.map((t) => t.key),
+]);
+for (const item of backlog) {
+  for (const slug of item.affects) {
+    if (!allSlugs.has(slug)) {
+      warn(`backlog "${item.id}": affects "${slug}" which does not exist yet`);
+    }
+  }
+}
+void backlogIds;
+
 for (const scenario of scenarios) {
   const where = `scenario "${scenario.slug}"`;
   checkBlocks(where, scenario.visibility, scenario.debrief);
@@ -310,6 +475,11 @@ for (const response of responses) {
 
 const counts = [
   ["articles", articles.length],
+  ["checklists", checklists.length],
+  ["reference tickets", tickets.length],
+  ["simulations", simulations.length],
+  ["principles", principles.length],
+  ["taxonomies", taxonomies.length],
   ["modules", modules.length],
   ["flows", flows.length],
   ["responses", responses.length],
@@ -320,6 +490,11 @@ const counts = [
 
 console.log("learnIT content validation\n");
 console.log(counts.map(([label, n]) => `  ${String(n).padStart(3)} ${label}`).join("\n"));
+console.log("");
+console.log(
+  `  ${String(placeholderCount).padStart(3)} placeholders across the content set`,
+);
+console.log(`  ${String(backlog.length).padStart(3)} tracked backlog items`);
 console.log("");
 
 if (warnings.length) {

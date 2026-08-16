@@ -6,6 +6,7 @@ import {
   Route,
   ShieldCheck,
   Terminal,
+  Ticket,
   TrendingUp,
 } from "lucide-react";
 import type { Role } from "@/lib/content/schema";
@@ -70,6 +71,12 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Quick Responses",
         icon: MessageSquareQuote,
         description: "Copy-ready messages",
+      },
+      {
+        href: "/tickets",
+        label: "Reference tickets",
+        icon: Ticket,
+        description: "Worked examples of real ticket shapes",
       },
     ],
   },
