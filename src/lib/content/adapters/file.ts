@@ -2,11 +2,16 @@ import "server-only";
 import {
   announcements,
   articles,
+  backlog,
+  checklists,
   flows,
   links,
   modules,
   responses,
   scenarios,
+  simulations,
+  taxonomies,
+  tickets,
 } from "@/content";
 import type { ContentSource } from "../repository";
 
@@ -25,6 +30,11 @@ import type { ContentSource } from "../repository";
 export const fileAdapter: ContentSource = {
   writable: false,
   articles: async () => articles,
+  checklists: async () => checklists,
+  tickets: async () => tickets,
+  simulations: async () => simulations,
+  taxonomies: async () => taxonomies,
+  backlog: async () => backlog,
   modules: async () => modules,
   flows: async () => flows,
   responses: async () => responses,

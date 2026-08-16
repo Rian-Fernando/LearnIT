@@ -8,10 +8,15 @@ import { fileAdapter } from "./adapters/file";
 import type {
   Announcement,
   Article,
+  BacklogItem,
   Category,
+  Checklist,
   ImportantLink,
   QuickResponse,
+  ReferenceTicket,
   Scenario,
+  Taxonomy,
+  TicketSimulation,
   TrainingModule,
   TroubleshootingFlow,
 } from "./schema";
@@ -35,6 +40,13 @@ import type {
 
 export interface ContentSource {
   articles(): Promise<Article[]>;
+  checklists(): Promise<Checklist[]>;
+  tickets(): Promise<ReferenceTicket[]>;
+  simulations(): Promise<TicketSimulation[]>;
+  /** Not viewer-filtered — option lists carry no user data. */
+  taxonomies(): Promise<Taxonomy[]>;
+  /** Admin-only. Never served to staff or guests. */
+  backlog(): Promise<BacklogItem[]>;
   modules(): Promise<TrainingModule[]>;
   flows(): Promise<TroubleshootingFlow[]>;
   responses(): Promise<QuickResponse[]>;
@@ -212,6 +224,96 @@ export async function getScenario(
   const all = await load(() => getContentSource().scenarios());
   const found = all.find((s) => s.slug === slug);
   return found && canView(viewer, found) ? found : null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Checklists                                                                 */
+/* -------------------------------------------------------------------------- */
+
+export async function listChecklists(viewer: Viewer): Promise<Checklist[]> {
+  const all = await load(() => getContentSource().checklists());
+  return all.filter((c) => canList(viewer, c)).sort(byTitle);
+}
+
+export async function getChecklist(
+  viewer: Viewer,
+  slug: string,
+): Promise<Checklist | null> {
+  const all = await load(() => getContentSource().checklists());
+  const found = all.find((c) => c.slug === slug);
+  return found && canView(viewer, found) ? found : null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reference tickets                                                          */
+/* -------------------------------------------------------------------------- */
+
+export async function listTickets(viewer: Viewer): Promise<ReferenceTicket[]> {
+  const all = await load(() => getContentSource().tickets());
+  return all.filter((t) => canList(viewer, t)).sort(byTitle);
+}
+
+export async function getTicket(
+  viewer: Viewer,
+  slug: string,
+): Promise<ReferenceTicket | null> {
+  const all = await load(() => getContentSource().tickets());
+  const found = all.find((t) => t.slug === slug);
+  return found && canView(viewer, found) ? found : null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Call simulations                                                           */
+/* -------------------------------------------------------------------------- */
+
+const SIM_DIFFICULTY = { intro: 0, core: 1, advanced: 2 } as const;
+
+export async function listSimulations(viewer: Viewer): Promise<TicketSimulation[]> {
+  const all = await load(() => getContentSource().simulations());
+  return all
+    .filter((s) => canList(viewer, s))
+    .sort(
+      (a, b) =>
+        SIM_DIFFICULTY[a.difficulty] - SIM_DIFFICULTY[b.difficulty] ||
+        a.title.localeCompare(b.title),
+    );
+}
+
+export async function getSimulation(
+  viewer: Viewer,
+  slug: string,
+): Promise<TicketSimulation | null> {
+  const all = await load(() => getContentSource().simulations());
+  const found = all.find((s) => s.slug === slug);
+  return found && canView(viewer, found) ? found : null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Taxonomy and backlog                                                       */
+/* -------------------------------------------------------------------------- */
+
+/** Option lists. No viewer filtering — these contain no user data. */
+export async function listTaxonomies(): Promise<Taxonomy[]> {
+  return getContentSource().taxonomies();
+}
+
+export async function getTaxonomy(key: string): Promise<Taxonomy | null> {
+  const all = await listTaxonomies();
+  return all.find((t) => t.key === key) ?? null;
+}
+
+/**
+ * The content backlog.
+ *
+ * Admin-only: it is a candid list of what the Help Desk documentation does not
+ * yet cover, which is useful to leadership and unhelpful to a technician
+ * mid-call. Callers must pass an admin viewer.
+ */
+export async function listBacklog(viewer: Viewer): Promise<BacklogItem[]> {
+  if (viewer.role !== "admin") return [];
+  const order = { high: 0, medium: 1, low: 2 } as const;
+  const all = await getContentSource().backlog();
+  return [...all].sort((a, b) => order[a.priority] - order[b.priority]);
 }
 
 /* -------------------------------------------------------------------------- */

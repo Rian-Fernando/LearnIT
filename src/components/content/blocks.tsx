@@ -3,13 +3,18 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CheckCircle2,
+  Compass,
   ExternalLink,
   FileText,
   Info,
   Lightbulb,
+  ListChecks,
   MessageSquareQuote,
   OctagonAlert,
+  Ticket,
+  Wrench,
 } from "lucide-react";
+import { principleById } from "@/content/principles";
 import type { Block, CalloutTone } from "@/lib/content/schema";
 import { cn } from "@/lib/cn";
 import { RichText } from "./rich-text";
@@ -302,6 +307,112 @@ function BlockView({ block, links }: { block: Block; links: LinkMap }) {
             </span>
             <span className="mt-0.5 block text-sm text-tertiary">
               Open the copy-ready template
+            </span>
+          </span>
+        </Link>
+      );
+
+    /**
+     * A known gap, shown rather than hidden.
+     *
+     * Rendering nothing here would leave a procedure looking complete when it
+     * is not, which is precisely the failure this block exists to prevent.
+     */
+    case "placeholder":
+      return (
+        <div className="rounded-lg border border-dashed border-warning/40 bg-warning-soft/40 px-4 py-3.5">
+          <div className="flex gap-3">
+            <Wrench className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="eyebrow text-warning">Not documented yet</p>
+              <p className="mt-1.5 text-sm font-medium text-primary">{block.label}</p>
+              {block.needs.length > 0 ? (
+                <>
+                  <p className="mt-2.5 text-xs text-tertiary">Still needed:</p>
+                  <ul className="mt-1.5 space-y-1">
+                    {block.needs.map((need) => (
+                      <li key={need} className="flex gap-2 text-sm leading-6 text-secondary">
+                        <span
+                          aria-hidden
+                          className="mt-[0.6875rem] size-1 shrink-0 rounded-full bg-warning"
+                        />
+                        {need}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+              <p className="mt-2.5 text-xs leading-5 text-tertiary">
+                This step is deliberately blank rather than filled with a guess.
+                Ask a supervisor{block.owner ? ` or ${block.owner}` : ""} before
+                acting on it.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+
+    case "checklistRef":
+      return (
+        <Link
+          href={`/checklists/${block.slug}`}
+          className="group flex items-start gap-3 rounded-lg border border-subtle bg-surface-inset px-4 py-3.5 transition-colors hover:border-default hover:bg-surface-overlay"
+        >
+          <ListChecks className="mt-0.5 size-4 shrink-0 text-accent-text" aria-hidden />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-primary">
+              Open the checklist
+              <ArrowUpRight className="size-3.5 text-tertiary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
+            </span>
+            <span className="mt-0.5 block text-sm text-tertiary">
+              {block.note ?? "Work through this before moving on"}
+            </span>
+          </span>
+        </Link>
+      );
+
+    /**
+     * A recurring habit, surfaced at the moment it applies rather than in a
+     * list of ten rules on a page nobody revisits.
+     */
+    case "principle": {
+      const principle = principleById(block.id);
+      if (!principle) return null;
+      return (
+        <aside className="rounded-lg border border-accent/25 bg-accent-soft px-4 py-3.5">
+          <div className="flex gap-3">
+            <Compass className="mt-0.5 size-4 shrink-0 text-accent-text" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="eyebrow text-accent-text">
+                Principle {String(principle.order).padStart(2, "0")}
+              </p>
+              <p className="mt-1.5 text-sm font-semibold text-primary">
+                {principle.title}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-secondary">
+                {block.context ?? principle.summary}
+              </p>
+              <p className="mt-1.5 text-sm leading-6 text-tertiary">{principle.why}</p>
+            </div>
+          </div>
+        </aside>
+      );
+    }
+
+    case "ticketRef":
+      return (
+        <Link
+          href={`/tickets/${block.slug}`}
+          className="group flex items-start gap-3 rounded-lg border border-subtle bg-surface-inset px-4 py-3.5 transition-colors hover:border-default hover:bg-surface-overlay"
+        >
+          <Ticket className="mt-0.5 size-4 shrink-0 text-signal" aria-hidden />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-primary">
+              Worked example
+              <ArrowUpRight className="size-3.5 text-tertiary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
+            </span>
+            <span className="mt-0.5 block text-sm text-tertiary">
+              {block.note ?? "See how this ticket is actually written"}
             </span>
           </span>
         </Link>
