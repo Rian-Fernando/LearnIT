@@ -4,7 +4,7 @@
 
 **learnIT does not invent an authentication process.** It has no password
 field, no user table, and no credential storage. It defines an interface and
-delegates identity entirely to whatever provider Adelphi IT designates.
+delegates identity to an external provider.
 
 This matters for a university system: an internally-invented login for a Help
 Desk tool would be a second credential to manage, a second thing to phish, and
@@ -17,8 +17,10 @@ almost certainly out of step with institutional policy.
 `src/lib/auth/types.ts`
 
 ```ts
+type ProviderId = "mock" | "google" | "microsoft" | "oidc";
+
 interface IdentityProvider {
-  readonly id: "mock" | "oidc";
+  readonly id: ProviderId;
   readonly displayName: string;
   beginSignIn(input: { returnTo: string }): Promise<SignInStart>;
   completeSignIn(input: {
@@ -35,98 +37,155 @@ The application only ever sees a `HelpDeskUser`:
 interface HelpDeskUser {
   id: string;                  // opaque IdP subject identifier
   name: string;                // display name
-  role: "staff" | "admin";     // derived from IdP group membership
+  role: "staff" | "admin";     // derived, never self-asserted
   title?: string;
   startedAt?: string;
 }
 ```
 
-Nothing outside `src/lib/auth/providers/` knows which provider is configured.
-Switching is `AUTH_PROVIDER=mock|oidc` in the environment.
+**More than one provider can be enabled at once.** `AUTH_PROVIDERS` is a
+comma-separated list, so `google,microsoft` puts both buttons on the sign-in
+screen. That is what makes moving between them a configuration change rather
+than a cutover: run both, migrate people, then drop the old one.
+
+Sessions record which provider issued them, and a session from a provider that
+is no longer enabled stops being honoured — so removing `mock` from the list
+immediately invalidates every demo session.
 
 ---
 
-## Provider: `mock`
+## Google → Microsoft: the migration path
 
-`src/lib/auth/providers/mock.ts`
+Both work today. They differ in one important way, and it drives the
+configuration.
 
-Exists so learnIT can be built, reviewed, and demonstrated before the
-application is registered with Adelphi's identity provider. It performs **no
-credential verification** — a persona is chosen from a fixed list of three
-fictional users (a first-week technician, an experienced technician, and a
-coordinator with admin rights).
+| | Google | Microsoft Entra ID |
+| --- | --- | --- |
+| Protocol | OIDC + PKCE | OIDC + PKCE |
+| Group membership in ID token | **No** | **Yes**, via a `groups` claim |
+| Organisation signal | `hd` (hosted domain) | `tid` (tenant id) |
+| Best role mechanism | domain + email allowlist | directory groups |
 
-Two guards keep this from becoming a liability:
+**Google does not put group membership in the ID token.** So with Google,
+authorisation is by verified domain plus explicit email allowlists. That is
+perfectly workable for a Help Desk of a few dozen people, and it is the right
+starting point.
 
-1. `src/lib/config/env.ts` refuses to start a production deployment with
-   `AUTH_PROVIDER=mock` unless `AUTH_ALLOW_MOCK_IN_PRODUCTION=true` is set
-   explicitly.
-2. That opt-in additionally requires `NEXT_PUBLIC_DEMO_MODE=true`, so mock
-   sign-in can only ever reach sanitised content. A deployment holding real
-   Help Desk documentation cannot use it at all.
+**Microsoft Entra ID can emit groups**, which is the better long-term answer for
+Adelphi — access follows a directory group maintained by IT, not a list in this
+repository. Adelphi runs Microsoft 365, so this is the expected destination.
 
-Sessions also record which provider issued them, and a session minted by `mock`
-is rejected outright once the deployment switches to `oidc`.
+### Recommended sequence
 
-## Provider: `oidc`
+**Now — Google, so sign-in works immediately:**
 
-`src/lib/auth/providers/oidc.ts`
+```env
+AUTH_PROVIDERS="google"
+GOOGLE_CLIENT_ID="…"
+GOOGLE_CLIENT_SECRET="…"
+AUTH_ALLOWED_DOMAINS="adelphi.edu"
+AUTH_ADMIN_EMAILS="you@adelphi.edu"
+```
 
-Standard OpenID Connect Authorization Code flow with PKCE. Written against the
-specification rather than any one vendor, so it works with Microsoft Entra ID,
-Okta, a Shibboleth OIDC bridge, or anything else Adelphi designates.
+**Transition — both, so nobody is locked out mid-move:**
 
-Implemented:
+```env
+AUTH_PROVIDERS="google,microsoft"
+MICROSOFT_TENANT_ID="<Adelphi tenant id>"
+MICROSOFT_CLIENT_ID="…"
+MICROSOFT_CLIENT_SECRET="…"
+```
 
-- Provider metadata discovery (`/.well-known/openid-configuration`), cached for
-  an hour
-- `state` (CSRF), `nonce` (replay), and PKCE `S256` — all verified on callback
-- ID token signature verification against the provider's JWKS
-- Issuer and audience validation
-- Role derived from a group claim
-- Optional provider-side single logout
+**Settled — Microsoft only, with groups:**
 
-Sign-in transaction values (state, nonce, PKCE verifier, return path) are held
-in a short-lived, httpOnly cookie for the ten minutes the flow takes.
+```env
+AUTH_PROVIDERS="microsoft"
+AUTH_ALLOWED_TENANTS="<Adelphi tenant id>"
+AUTH_ADMIN_GROUP="<leadership group object id>"
+AUTH_STAFF_GROUP="<technician group object id>"
+```
 
-### Registration checklist for Adelphi IT
+Because the subject identifier changes between providers, a person who signed in
+with Google and later signs in with Microsoft is a new subject to learnIT. That
+only affects browser-stored learning progress, which is per-device anyway.
 
-What the identity provider administrator needs to configure:
+---
+
+## Registration
+
+### Google
+
+Google Cloud Console → APIs & Services → Credentials → **Create OAuth client ID**
 
 | Item | Value |
 | --- | --- |
-| Application type | Confidential web application (server-side) |
-| Grant type | Authorization Code with PKCE |
-| Redirect URI | `https://<deployment-host>/api/auth/callback` |
-| Post-logout redirect URI | `https://<deployment-host>/` |
-| Scopes | `openid profile email` (minimum) |
-| Required claims | `sub`, `name` (or `preferred_username`), and a groups claim |
-| Groups | One group for Help Desk staff, one for Help Desk leadership |
+| Application type | Web application |
+| Authorised redirect URI | `https://learnit.rianfernando.com/api/auth/callback?provider=google` |
+| Scopes | `openid email profile` |
 
-What learnIT then needs in its environment:
+For local development add `http://localhost:3000/api/auth/callback?provider=google`.
 
-```env
-AUTH_PROVIDER="oidc"
-OIDC_ISSUER="https://…"
-OIDC_CLIENT_ID="…"
-OIDC_CLIENT_SECRET="…"
-OIDC_SCOPES="openid profile email"
-OIDC_GROUPS_CLAIM="groups"
-OIDC_ADMIN_GROUP="<group identifier for leadership>"
-OIDC_STAFF_GROUP="<group identifier for technicians>"
-```
+learnIT sends `prompt=select_account` so a shared Help Desk workstation always
+shows the account chooser rather than silently reusing whoever is signed in, and
+passes the first configured domain as an `hd` hint. The hint is cosmetic — the
+real restriction is `AUTH_ALLOWED_DOMAINS`, enforced server-side against the
+verified `hd` claim after the token signature is checked.
 
-### Role derivation
+### Microsoft Entra ID
 
-Role comes from group membership and is **never self-asserted by the client**:
+Entra admin centre → App registrations → **New registration**
 
-- Member of the admin group → `admin`
-- Member of the staff group → `staff`
-- Neither → **sign-in is refused**
+| Item | Value |
+| --- | --- |
+| Supported account types | Single tenant (recommended) |
+| Redirect URI (Web) | `https://learnit.rianfernando.com/api/auth/callback?provider=microsoft` |
+| Client secret | Certificates & secrets → New client secret |
+| Token configuration | Add the **groups** claim to the ID token |
+| API permissions | `openid`, `profile`, `email` |
 
-Refusing rather than defaulting to the lower privilege is deliberate. An account
-that is not recognised as Help Desk should not receive a Help Desk session at
-all, and the user is told plainly why.
+Set `MICROSOFT_TENANT_ID` to the tenant id rather than `common`. Multi-tenant
+`common` works — learnIT handles the templated issuer Microsoft returns for it —
+but a specific tenant is one fewer thing to get wrong.
+
+### Any other provider
+
+`AUTH_PROVIDERS="oidc"` with `OIDC_ISSUER`, `OIDC_CLIENT_ID`,
+`OIDC_CLIENT_SECRET`. Same implementation, generic configuration. Redirect URI
+is `…/api/auth/callback?provider=oidc`.
+
+---
+
+## Role resolution
+
+`src/lib/auth/roles.ts`
+
+First match wins:
+
+1. **Admin group** — `AUTH_ADMIN_GROUP` present in the groups claim
+2. **Admin email** — verified email in `AUTH_ADMIN_EMAILS`
+3. **Staff group** — `AUTH_STAFF_GROUP` present in the groups claim
+4. **Staff email** — verified email in `AUTH_STAFF_EMAILS`
+5. **Allowed domain** — `hd` claim, or verified email domain, in `AUTH_ALLOWED_DOMAINS`
+6. **Refuse**
+
+`AUTH_ALLOWED_TENANTS`, when set, is a hard gate applied *before* any of this —
+an account from another directory is refused regardless of allowlists.
+
+Three deliberate choices:
+
+**Refuse rather than default to staff.** An account nobody has authorised should
+not get a Help Desk session at all, and the user is told plainly why.
+
+**Unverified emails are never used.** If `email_verified` is false, the address
+proves nothing and is ignored for both allowlists and domain matching.
+
+**`hd` beats the email domain.** The hosted-domain claim is asserted by the
+provider about the account; an email local part is not. Where both exist, `hd`
+wins.
+
+The environment schema refuses to boot if a real provider is enabled with no
+authorisation rule configured at all — otherwise every sign-in would be refused
+and the deployment would look broken rather than misconfigured.
 
 ---
 
@@ -139,12 +198,12 @@ cookie. Default lifetime is eight hours — one shift — configurable with
 `SESSION_MAX_AGE`.
 
 The token carries display name, role, job title, and start date. It carries **no
-credential**, no IdP access or refresh token, and nothing that would be damaging
-if decoded. Because it is `httpOnly`, an XSS bug cannot lift it.
+credential**, no IdP access or refresh token, and nothing damaging if decoded.
+Because it is `httpOnly`, an XSS bug cannot lift it.
 
 Verification failures of any kind — expired, tampered, signed with a rotated
-key — resolve to "no session" rather than an error. A forged cookie produces a
-redirect to sign-in, never a 500.
+key, issued by a now-disabled provider — resolve to "no session" rather than an
+error. A forged cookie produces a redirect to sign-in, never a 500.
 
 ### If server-side sessions become a requirement
 
@@ -154,28 +213,39 @@ the whole change.
 
 ---
 
-## Authorization
+## Flow security
+
+- **PKCE `S256`** on every provider.
+- **`state`** generated per attempt and verified on callback — the CSRF defence
+  for the authorization response.
+- **`nonce`** generated per attempt and compared against the ID token claim.
+- **ID token signature** verified against the provider's JWKS, with audience
+  checked against the client id.
+- **Issuer** verified against the discovery document. Microsoft's multi-tenant
+  discovery reports a `{tenantid}` template while the token carries the concrete
+  tenant, so templates are matched by pattern — still an exact-shape check.
+- **Provider selection on callback comes from the transaction cookie**, not the
+  query string, so a caller cannot pair one provider's state with another's
+  handler.
+- **Token exchange failures never surface the provider's response**, which can
+  echo the client secret in some implementations.
+
+---
+
+## Authorization layers
 
 Role ranking is `guest (0) < staff (1) < admin (2)`.
 
-There are four layers, and only two of them are actually load-bearing:
-
 | Layer | Location | Load-bearing? |
 | --- | --- | --- |
-| Navigation hiding | `components/app/navigation.ts` | **No** — cosmetic only |
-| Middleware | `src/middleware.ts` | **No** — cookie *presence* check, avoids a render-then-redirect flash |
+| Navigation hiding | `components/app/navigation.ts` | **No** — cosmetic |
+| Middleware | `src/middleware.ts` | **No** — cookie *presence* only |
 | Route guard | `requireStaff()` / `requireAdmin()` in every protected server component and Server Action | **Yes** |
 | Content filtering | `repository.ts` + `access.ts`, per viewer | **Yes** |
 
-The middleware deliberately does not verify the token or inspect the role. A
-forged cookie passes it and lands directly on a signature check it cannot pass.
-
 Server Actions re-check the role independently — a Server Action is a public
-HTTP endpoint, and the fact that its form is only rendered inside `/admin`
-proves nothing about who is calling it.
-
-Route handlers use `authorize(role)`, which returns `401` or `403` rather than
-redirecting.
+HTTP endpoint, and the fact that its form only renders inside `/admin` proves
+nothing about who is calling it.
 
 ### Verified behaviour
 

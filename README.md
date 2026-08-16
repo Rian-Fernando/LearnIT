@@ -101,8 +101,9 @@ that forgets to filter still cannot leak internal documentation. See
 
 **3. Identity is abstracted, not invented.** learnIT does not define its own
 credentials. It defines an `IdentityProvider` interface with a mock
-implementation for development and a standards-based OIDC implementation for
-Adelphi's approved identity provider. Switching is an environment variable. See
+implementation for development and OpenID Connect implementations for Google and
+Microsoft Entra ID. More than one can run at once, so migrating between them is
+a configuration change rather than a cutover. See
 [docs/authentication.md](docs/authentication.md).
 
 ---
@@ -112,7 +113,7 @@ Adelphi's approved identity provider. Switching is an environment variable. See
 | Choice | Reason |
 | --- | --- |
 | **Next.js (App Router) + TypeScript** | Server components let authorization run before render rather than after, which is what makes the security model simple. Static rendering for the public demo, dynamic for authenticated routes, in one codebase. |
-| **Tailwind CSS v4** | Semantic design tokens in CSS with utilities on top. Light and dark themes are a token swap, not a second stylesheet. |
+| **Tailwind CSS v4** | Semantic design tokens in CSS with utilities on top. Light and dark themes are a token swap, not a second stylesheet. Every text/surface pairing is verified against WCAG AA. |
 | **Three.js + React Three Fiber** | The landing scene is a single persistent point cloud morphing between formations. Declarative scene graph, and the whole bundle is code-split away from anyone who will not see it. |
 | **Zod** | The content schema and the environment schema are the same idea: validate at the boundary, then trust the types. |
 | **MiniSearch** | ~10 kB client-side index. Searching happens with no round trip, which is the difference between usable and unusable during a call. |
@@ -128,34 +129,44 @@ database is required yet), and AI features (see
 
 ## Deployment
 
-learnIT is a standard Next.js application and runs anywhere Node 20+ does.
+Deployed on **Vercel** at **https://learnit.rianfernando.com**, with DNS through
+Cloudflare.
 
 **Public portfolio deployment** — sanitised content, demo personas:
 
 ```env
+NEXT_PUBLIC_SITE_URL="https://learnit.rianfernando.com"
 NEXT_PUBLIC_DEMO_MODE="true"
-AUTH_PROVIDER="mock"
+AUTH_PROVIDERS="mock"
 AUTH_ALLOW_MOCK_IN_PRODUCTION="true"
-SESSION_SECRET="<generated>"
+SESSION_SECRET="<openssl rand -base64 48>"
 ```
 
-**Internal deployment** — real content, real SSO:
+**Internal deployment** — real content, real sign-in:
 
 ```env
+NEXT_PUBLIC_SITE_URL="https://learnit.rianfernando.com"
 NEXT_PUBLIC_DEMO_MODE="false"
-AUTH_PROVIDER="oidc"
-OIDC_ISSUER="…"
-OIDC_CLIENT_ID="…"
-OIDC_CLIENT_SECRET="…"
-OIDC_ADMIN_GROUP="…"
-OIDC_STAFF_GROUP="…"
-SESSION_SECRET="<generated>"
+AUTH_PROVIDERS="google"              # or "google,microsoft", or "microsoft"
+GOOGLE_CLIENT_ID="…"
+GOOGLE_CLIENT_SECRET="…"
+AUTH_ALLOWED_DOMAINS="adelphi.edu"
+AUTH_ADMIN_EMAILS="…"
+SESSION_SECRET="<openssl rand -base64 48>"
 ```
 
-The environment schema refuses to start a production deployment that uses mock
-authentication without explicitly opting in, and refuses to combine mock
-authentication with the internal content set at all. See
+The environment schema refuses to start a production deployment that enables
+mock authentication without explicitly opting in, refuses to combine mock
+authentication with the internal content set at all, and refuses to start a real
+provider with no authorisation rule configured. See
 [docs/security.md](docs/security.md).
+
+**Database.** Nothing needs one today — the file content adapter runs the whole
+application. When durable admin editing and cross-device progress are wanted,
+provision **Neon Postgres from the Vercel Marketplace** (Storage → Neon).
+`DATABASE_URL` is injected automatically, it scales to zero, and the code uses a
+plain Postgres driver with no vendor SDK, so it stays portable. See
+[docs/architecture.md](docs/architecture.md).
 
 ---
 
@@ -179,4 +190,10 @@ replace it. [docs/content.md](docs/content.md) explains how.
 - [Content](docs/content.md) — authoring articles, modules, workflows, responses, and scenarios
 - [Security](docs/security.md) — the authorization model, threat notes, and headers
 - [Analytics](docs/analytics.md) — what is measured, and what deliberately is not
+- [Discoverability](docs/discoverability.md) — SEO, and being cited by AI answer engines
 - [Roadmap](docs/roadmap.md) — what is built, what is next
+
+---
+
+Built by [Rian Fernando](https://rianfernando.com) ·
+[More projects](https://rianfernando.com/projects)

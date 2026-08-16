@@ -97,10 +97,19 @@ without a developer in the loop.
 
 **To add the Postgres adapter:**
 
-1. Implement `ContentSource` (seven methods returning arrays) in
-   `src/lib/content/adapters/postgres.ts`.
-2. Return it from `getContentSource()` when `CONTENT_ADAPTER=postgres`.
-3. Set `writable: true`, which switches the admin console out of preview mode.
+1. Provision **Neon** from the Vercel dashboard (Storage → Neon). `DATABASE_URL`
+   is injected into the project automatically.
+2. Implement `ContentSource` (seven methods returning arrays) in
+   `src/lib/content/adapters/postgres.ts`, using a plain Postgres driver — no
+   vendor SDK, so the database stays swappable.
+3. Return it from `getContentSource()` when `CONTENT_ADAPTER=postgres`.
+4. Set `writable: true`, which switches the admin console out of preview mode.
+
+Neon over Supabase here for one reason: learnIT needs Postgres and nothing else.
+Authentication is already handled by the identity provider, there is no file
+storage, and there is no realtime requirement — so Supabase's additional
+services would go unused while adding a second dashboard and a second bill.
+Neon also scales to zero, which matters while this is a portfolio deployment.
 
 The schema follows directly from `src/lib/content/schema.ts` — one table per
 content type with a `jsonb` body column, plus a `content_revisions` table
