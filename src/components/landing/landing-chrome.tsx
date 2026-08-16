@@ -16,7 +16,7 @@ export function LandingHeader() {
       <div className="mx-auto flex h-20 w-full max-w-[88rem] items-center justify-between px-6 sm:px-10">
         <Link
           href="/"
-          className="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#e89f2c]"
+          className="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#c7f04a]"
         >
           <Wordmark size="md" tone="onDark" />
           <span className="sr-only">learnIT home</span>
@@ -25,11 +25,11 @@ export function LandingHeader() {
         <nav className="flex items-center gap-1 sm:gap-2">
           <Link
             href="/demo"
-            className="rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e89f2c]"
+            className="rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c7f04a]"
           >
             Explore demo
           </Link>
-          <Button href="/signin" size="sm" className="bg-white text-[#08090b] hover:bg-white/90">
+          <Button href="/signin" size="sm" className="bg-white text-[#0a0b09] hover:bg-white/90">
             Sign in
           </Button>
         </nav>
@@ -49,13 +49,13 @@ export function LandingHero() {
   return (
     <section
       data-surface="cinematic"
-      className="relative flex min-h-screen items-center overflow-hidden bg-[#08090b]"
+      className="relative flex min-h-screen items-center overflow-hidden bg-[#0a0b09]"
     >
       {/* Static backdrop — no WebGL here, so first paint is immediate. */}
       <div aria-hidden className="bg-grid absolute inset-0 opacity-[0.55]" />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_30%_45%,rgba(232,159,44,0.10),transparent_70%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_30%_45%,rgba(199,240,74,0.09),transparent_70%)]"
       />
       <div
         aria-hidden
@@ -63,7 +63,7 @@ export function LandingHero() {
       />
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#08090b] to-transparent"
+        className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0a0b09] to-transparent"
       />
 
       <div className="relative mx-auto w-full max-w-[88rem] px-6 py-28 sm:px-10">
@@ -143,11 +143,11 @@ export function LandingClosing() {
   return (
     <section
       data-surface="cinematic"
-      className="relative overflow-hidden border-t border-white/[0.07] bg-[#08090b]"
+      className="relative overflow-hidden border-t border-white/[0.07] bg-[#0a0b09]"
     >
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(232,159,44,0.09),transparent_70%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(199,240,74,0.08),transparent_70%)]"
       />
 
       <div className="relative mx-auto w-full max-w-[88rem] px-6 py-28 sm:px-10 sm:py-36">
@@ -186,9 +186,9 @@ export function LandingClosing() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="group flex h-full flex-col rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-white/15 hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e89f2c]"
+                  className="group flex h-full flex-col rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-white/15 hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c7f04a]"
                 >
-                  <Icon className="size-4 text-[#e89f2c]" aria-hidden />
+                  <Icon className="size-4 text-[#c7f04a]" aria-hidden />
                   <span className="mt-4 flex items-center gap-1.5 text-sm font-medium text-white">
                     {link.title}
                     <ArrowRight
@@ -213,15 +213,15 @@ export function LandingFooter() {
   return (
     <footer
       data-surface="cinematic"
-      className="border-t border-white/[0.07] bg-[#08090b]"
+      className="border-t border-white/[0.07] bg-[#0a0b09]"
     >
       <div className="mx-auto w-full max-w-[88rem] px-6 py-12 sm:px-10">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-md">
             <Wordmark size="sm" tone="onDark" />
             <p className="mt-3 text-sm leading-6 text-white/40">
-              An internal onboarding and knowledge platform for the Adelphi
-              University Help Desk.
+              An onboarding and knowledge platform for a university IT Help Desk.
+              Built for the Adelphi University Help Desk.
             </p>
           </div>
 
@@ -235,14 +235,41 @@ export function LandingFooter() {
             <Link href="/about" className="text-white/50 transition-colors hover:text-white">
               About this project
             </Link>
+            <a
+              href="https://github.com/Rian-Fernando/LearnIT"
+              className="text-white/50 transition-colors hover:text-white"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Source
+            </a>
           </nav>
         </div>
 
-        <div className="mt-10 border-t border-white/[0.07] pt-6">
-          <p className="text-xs leading-6 text-white/30">
+        <div className="mt-10 flex flex-col gap-4 border-t border-white/[0.07] pt-6 sm:flex-row sm:items-start sm:justify-between">
+          <p className="max-w-2xl text-xs leading-6 text-white/30">
             Demonstration content is fictional and does not represent official
             Adelphi University Help Desk procedure. Not an official University
             service.
+          </p>
+
+          {/* Attribution back to the portfolio. Kept as a real, crawlable link
+              so this project is discoverable as part of rianfernando.com. */}
+          <p className="shrink-0 text-xs leading-6 text-white/40">
+            Built by{" "}
+            <a
+              href="https://rianfernando.com"
+              className="text-[#c7f04a] underline decoration-[#c7f04a]/30 underline-offset-2 transition-colors hover:decoration-[#c7f04a]"
+            >
+              Rian Fernando
+            </a>{" "}
+            ·{" "}
+            <a
+              href="https://rianfernando.com/projects"
+              className="text-white/50 underline decoration-white/20 underline-offset-2 transition-colors hover:text-white"
+            >
+              More projects
+            </a>
           </p>
         </div>
       </div>

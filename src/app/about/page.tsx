@@ -24,12 +24,12 @@ export default function AboutPage() {
       <main
         id="main"
         data-surface="cinematic"
-        className="relative min-h-screen bg-[#08090b]"
+        className="relative min-h-screen bg-[#0a0b09]"
       >
         <div aria-hidden className="bg-grid absolute inset-0 opacity-30" />
         <div
           aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(232,159,44,0.08),transparent_70%)]"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(199,240,74,0.07),transparent_70%)]"
         />
 
         <div className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-8 sm:py-24">
@@ -189,7 +189,7 @@ function Section({
 }) {
   return (
     <section>
-      <p className="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-[#e89f2c]">
+      <p className="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-[#c7f04a]">
         {eyebrow}
       </p>
       <h2 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-white">
