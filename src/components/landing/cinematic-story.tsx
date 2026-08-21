@@ -59,7 +59,8 @@ export function CinematicStory() {
         {/* ---- copy ---- */}
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-[88rem] px-6 sm:px-10">
-            <div className="max-w-2xl">
+            {/* Capped so the copy can never run under the system-label column. */}
+            <div className="max-w-2xl xl:max-w-[52%]">
               {/* `key` remounts the subtree on act change, replaying the
                   entrance animation. */}
               <div key={act.id} className="animate-fade-up">
@@ -79,8 +80,10 @@ export function CinematicStory() {
 
                 {act.subline ? (
                   <p
-                    className="text-over-scene mt-3 text-3xl font-semibold leading-[1.08] tracking-[-0.03em] text-white/55 sm:text-4xl lg:text-[3.25rem]"
-                    style={{ animationDelay: "120ms" }}
+                    // `animate-fade-up` is what the delay applies to — without
+                    // the animation class the inline delay did nothing.
+                    className="animate-fade-up text-over-scene mt-3 text-3xl font-semibold leading-[1.08] tracking-[-0.03em] text-white/55 sm:text-4xl lg:text-[3.25rem]"
+                    style={{ animationDelay: "140ms" }}
                   >
                     {act.subline}
                   </p>
@@ -148,31 +151,37 @@ function PillarList({ pillars }: { pillars: { title: string; description: string
  */
 function SystemCloud({ systems }: { systems: string[] }) {
   return (
+    /**
+     * Confined to its own column rather than scattered across the stage.
+     *
+     * These were previously placed on a circle centred at 62% with a 26% radius,
+     * which reached back to 36% — straight through the copy column — and put
+     * labels on top of the headline and body text. A circle over the full stage
+     * cannot avoid the text, so the labels now live in a grid inside a container
+     * that starts where the copy ends. Overlap becomes structurally impossible
+     * rather than tuned away.
+     */
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-0 hidden lg:block"
+      className="pointer-events-none absolute inset-y-0 right-0 hidden w-[38%] items-center xl:flex 2xl:w-[42%]"
     >
-      {systems.map((system, index) => {
-        // Distributed around the right two thirds of the stage, away from copy.
-        const angle = (index / systems.length) * Math.PI * 2;
-        // Rounded for the same reason as the static diagrams: trigonometric
-        // results differ between engines in the last digit.
-        const left = Math.round((62 + Math.cos(angle) * 26) * 100) / 100;
-        const top = Math.round((50 + Math.sin(angle) * 32) * 100) / 100;
-        return (
+      <div className="grid w-full grid-cols-2 gap-x-4 gap-y-3 px-10">
+        {systems.map((system, index) => (
           <span
             key={system}
-            className="animate-fade-in absolute -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-white/45 backdrop-blur-sm"
-            style={{
-              left: `${left}%`,
-              top: `${top}%`,
-              animationDelay: `${index * 80}ms`,
-            }}
+            className={cn(
+              "animate-fade-in rounded-md border border-white/[0.12] bg-white/[0.04] px-2.5 py-1.5",
+              "text-center font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-white/55 backdrop-blur-sm",
+              // A gentle stagger down the column keeps it from reading as a
+              // rigid table.
+              index % 2 === 1 && "translate-y-3",
+            )}
+            style={{ animationDelay: `${index * 70}ms` }}
           >
             {system}
           </span>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }
@@ -188,8 +197,8 @@ function ActRail({ count, active }: { count: number; active: number }) {
         <span
           key={index}
           className={cn(
-            "h-6 w-px transition-colors duration-500",
-            index === active ? "bg-[#c7f04a]" : "bg-white/15",
+            "w-px rounded-full transition-all duration-500",
+            index === active ? "h-8 bg-[#c7f04a]" : "h-5 bg-white/25",
           )}
         />
       ))}

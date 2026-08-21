@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, GraduationCap, Route } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, Route, Search } from "lucide-react";
 import { Wordmark } from "@/components/brand/wordmark";
 import { Button } from "@/components/ui/button";
 
@@ -51,15 +51,21 @@ export function LandingHero() {
       data-surface="cinematic"
       className="relative flex min-h-screen items-center overflow-hidden bg-[#0a0b09]"
     >
-      {/* Static backdrop — no WebGL here, so first paint is immediate. */}
-      <div aria-hidden className="bg-grid absolute inset-0 opacity-[0.55]" />
+      {/* Backdrop. Raised from the near-invisible original: the grid now reads
+          as structure rather than noise, and a second warm wash on the right
+          stops that half of the screen falling away to flat black. */}
+      <div aria-hidden className="bg-grid absolute inset-0 opacity-90" />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_30%_45%,rgba(199,240,74,0.09),transparent_70%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_22%_42%,rgba(199,240,74,0.16),transparent_68%)]"
       />
       <div
         aria-hidden
-        className="bg-grain-layer pointer-events-none absolute inset-0 opacity-[0.15] mix-blend-overlay"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_82%_58%,rgba(86,199,232,0.09),transparent_70%)]"
+      />
+      <div
+        aria-hidden
+        className="bg-grain-layer pointer-events-none absolute inset-0 opacity-[0.14] mix-blend-overlay"
       />
       <div
         aria-hidden
@@ -67,54 +73,167 @@ export function LandingHero() {
       />
 
       <div className="relative mx-auto w-full max-w-[88rem] px-6 py-28 sm:px-10">
-        <div className="max-w-3xl">
-          <p className="animate-fade-up font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-white/40">
-            Adelphi University · Help Desk
-          </p>
+        <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,1fr)_26rem] xl:gap-20">
+          {/* ------------------------------------------------------- copy */}
+          <div>
+            <p className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-white/55">
+              <span aria-hidden className="size-1.5 rounded-full bg-[#c7f04a]" />
+              Adelphi University · Help Desk
+            </p>
 
-          <h1 className="animate-fade-up mt-7" style={{ animationDelay: "80ms" }}>
-            <Wordmark size="xl" tone="onDark" className="block" />
-            <span className="mt-5 block max-w-2xl text-2xl font-medium leading-[1.2] tracking-[-0.025em] text-white/85 sm:text-[2rem]">
-              Learn the tools. Understand the workflow. Support the community.
-            </span>
-          </h1>
+            <h1 className="animate-fade-up mt-7" style={{ animationDelay: "80ms" }}>
+              <Wordmark size="xl" tone="onDark" className="block" />
+              <span className="mt-5 block max-w-2xl text-2xl font-medium leading-[1.2] tracking-[-0.025em] text-white/85 sm:text-[2rem]">
+                Learn the tools. Understand the workflow. Support the community.
+              </span>
+            </h1>
 
-          <p
-            className="animate-fade-up mt-7 max-w-xl text-base leading-relaxed text-white/55"
-            style={{ animationDelay: "160ms" }}
-          >
-            The onboarding and knowledge platform for the Help Desk — structured
-            training for your first week, and a reference fast enough to use with
-            someone on the line.
-          </p>
-
-          <div
-            className="animate-fade-up mt-10 flex flex-wrap items-center gap-3"
-            style={{ animationDelay: "240ms" }}
-          >
-            <Button href="/signin" size="lg">
-              Start learning
-              <ArrowRight className="size-4" aria-hidden />
-            </Button>
-            <Button
-              href="/demo"
-              size="lg"
-              variant="secondary"
-              className="border-white/15 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
+            <p
+              className="animate-fade-up mt-7 max-w-xl text-base leading-relaxed text-white/60"
+              style={{ animationDelay: "160ms" }}
             >
-              Explore the demo
-            </Button>
+              learnIT is the onboarding and knowledge platform for the Help Desk.
+              Structured training for a technician&rsquo;s first week, and a
+              reference fast enough to search while someone is on the line.
+            </p>
+
+            <div
+              className="animate-fade-up mt-10 flex flex-wrap items-center gap-3"
+              style={{ animationDelay: "240ms" }}
+            >
+              <Button href="/signin" size="lg">
+                Start learning
+                <ArrowRight className="size-4" aria-hidden />
+              </Button>
+              <Button
+                href="/demo"
+                size="lg"
+                variant="secondary"
+                className="border-white/15 bg-white/[0.05] text-white hover:border-white/25 hover:bg-white/[0.1]"
+              >
+                Explore the demo
+              </Button>
+            </div>
+
+            {/* A concrete sense of scale, which the hero previously lacked. */}
+            <dl
+              className="animate-fade-up mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/[0.08] pt-6"
+              style={{ animationDelay: "300ms" }}
+            >
+              {[
+                ["Procedures", "20"],
+                ["Guided workflows", "4"],
+                ["Training modules", "15"],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-xs text-white/40">{label}</dt>
+                  <dd className="tabular mt-1 text-2xl font-semibold tracking-tight text-white">
+                    {value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            <p
+              className="animate-fade-up mt-6 text-xs text-white/35"
+              style={{ animationDelay: "340ms" }}
+            >
+              The demo uses fictional content and requires no account.
+            </p>
           </div>
 
-          <p
-            className="animate-fade-up mt-6 text-xs text-white/35"
-            style={{ animationDelay: "300ms" }}
-          >
-            The demo uses fictional content and requires no account.
-          </p>
+          {/* ------------------------------------------------------ preview */}
+          <HeroPreview />
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * A stylised search result, standing in for the product itself.
+ *
+ * The hero previously left the right two thirds of a desktop screen empty,
+ * which read as unfinished rather than restrained. This shows the single
+ * interaction learnIT is judged on — type a word, get the procedure — so a
+ * visitor understands what it is before reading a line of copy.
+ *
+ * Static markup rather than a live component: it is illustrative, and wiring
+ * the real palette in here would mean shipping the search index to the
+ * marketing page.
+ */
+function HeroPreview() {
+  const results = [
+    { title: "Printer troubleshooting path", meta: "Printing · reviewed 30 Jul", hot: true },
+    { title: "Konica devices: the redirect procedure", meta: "Printing · reviewed 5 Aug" },
+    { title: "What printing the Help Desk supports", meta: "Printing · reviewed 5 Aug" },
+  ];
+
+  return (
+    <div
+      aria-hidden
+      className="animate-fade-up relative hidden lg:block"
+      style={{ animationDelay: "200ms" }}
+    >
+      <div
+        aria-hidden
+        className="absolute -inset-6 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(199,240,74,0.10),transparent_70%)]"
+      />
+
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-[#121410]/90 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.9)] backdrop-blur-sm">
+        <div className="flex items-center gap-2 border-b border-white/[0.08] px-4 py-3">
+          <span aria-hidden className="size-2.5 rounded-full bg-white/15" />
+          <span aria-hidden className="size-2.5 rounded-full bg-white/15" />
+          <span aria-hidden className="size-2.5 rounded-full bg-white/15" />
+          <span className="ml-2 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-white/35">
+            learnIT
+          </span>
+          <kbd className="ml-auto rounded border border-white/12 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.625rem] text-white/45">
+            ⌘K
+          </kbd>
+        </div>
+
+        <div className="flex items-center gap-2.5 border-b border-white/[0.08] px-4 py-3.5">
+          <Search className="size-4 shrink-0 text-white/35" />
+          <span className="font-mono text-sm text-white/85">printer</span>
+          <span
+            aria-hidden
+            className="ml-0.5 inline-block h-4 w-px animate-pulse bg-[#c7f04a]"
+          />
+        </div>
+
+        <ul className="p-2">
+          {results.map((result) => (
+            <li
+              key={result.title}
+              className={`flex items-start gap-3 rounded-lg px-3 py-2.5 ${
+                result.hot ? "bg-white/[0.06]" : ""
+              }`}
+            >
+              <BookOpen
+                className={`mt-0.5 size-3.5 shrink-0 ${
+                  result.hot ? "text-[#c7f04a]" : "text-white/30"
+                }`}
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[0.8125rem] font-medium text-white/90">
+                  {result.title}
+                </span>
+                <span className="mt-0.5 block truncate text-[0.6875rem] text-white/40">
+                  {result.meta}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="border-t border-white/[0.08] px-4 py-2.5">
+          <p className="font-mono text-[0.625rem] text-white/30">
+            20 items indexed · results in under a millisecond
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

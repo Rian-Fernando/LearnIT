@@ -51,12 +51,15 @@ const VERTEX_SHADER = /* glsl */ `
     vec4 mvPosition = modelViewMatrix * vec4(transformed, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    // Perspective size attenuation.
+    // Perspective size attenuation, clamped at the near end. Without the
+    // clamp, points close to the camera blow up into soft discs and the whole
+    // formation reads as bokeh rather than structure.
     float dist = max(-mvPosition.z, 0.001);
-    gl_PointSize = uSize * aScale * uPixelRatio * (14.0 / dist);
+    float size = uSize * aScale * uPixelRatio * (14.0 / dist);
+    gl_PointSize = clamp(size, 1.0, 9.0 * uPixelRatio);
 
     // Fade with depth so the far field recedes instead of speckling.
-    vAlpha = smoothstep(46.0, 9.0, dist) * (0.45 + aScale * 0.55);
+    vAlpha = smoothstep(52.0, 8.0, dist) * (0.55 + aScale * 0.45);
 
     // Twinkle: subtle, low frequency, never distracting.
     vAlpha *= 0.82 + 0.18 * sin(uTime * 1.1 + aPhase * 12.566);
@@ -84,7 +87,7 @@ const FRAGMENT_SHADER = /* glsl */ `
 
     vec3 color = mix(uColorCore, uColorAccent, clamp(vTone * uAccentMix, 0.0, 1.0));
 
-    gl_FragColor = vec4(color, (halo * 0.9 + core * 0.25) * vAlpha);
+    gl_FragColor = vec4(color, (halo * 1.05 + core * 0.3) * vAlpha);
     if (gl_FragColor.a < 0.01) discard;
   }
 `;
@@ -136,7 +139,7 @@ export function NetworkField({
 
   const uniforms = useMemo(
     () => ({
-      uSize: { value: 26 },
+      uSize: { value: 30 },
       uTime: { value: 0 },
       uProgress: { value: 0 },
       uPixelRatio: { value: 1 },
@@ -196,23 +199,34 @@ export function NetworkField({
     uniforms.uPixelRatio.value = Math.min(state.gl.getPixelRatio(), 2);
     // The field shifts from a cold, undifferentiated grey to the brand lime
     // exactly as the story turns from problem to product.
-    uniforms.uAccentMix.value = THREE.MathUtils.smoothstep(p, 0.52, 0.86);
+    uniforms.uAccentMix.value = THREE.MathUtils.smoothstep(p, 0.34, 0.78);
 
     if (lineMaterialRef.current) {
       // Connections are the point of act two, fade back during the overload of
       // act three, and disappear once structure replaces ad-hoc linkage.
       const rise = THREE.MathUtils.smoothstep(p, 0.08, 0.28);
       const fall = 1 - THREE.MathUtils.smoothstep(p, 0.42, 0.72);
-      lineMaterialRef.current.opacity = rise * fall * 0.3;
+      lineMaterialRef.current.opacity = rise * fall * 0.42;
     }
 
     /* ---- camera: a single continuous move, not per-act cuts ---- */
     const camera = state.camera;
     const orbit = p * Math.PI * 0.52;
-    const radius = 34 - p * 12;
+
+    /**
+     * Distance is deliberately not monotonic.
+     *
+     * It was previously a straight 34 → 22 pull-in, which put the camera inside
+     * the final formation: the interface panels span roughly 38 units and simply
+     * did not fit in frame, so the last act rendered as blurred blobs. The curve
+     * now closes in through the middle acts, where density is the point, then
+     * opens back out so the panels read as panels.
+     */
+    const closeIn = Math.sin(Math.min(p, 1) * Math.PI); // 0 → 1 → 0
+    const radius = 34 - closeIn * 11 + Math.pow(p, 2.2) * 6;
 
     camera.position.x = Math.sin(orbit) * radius * 0.34;
-    camera.position.y = 2.6 - p * 1.4 + Math.sin(state.clock.elapsedTime * 0.22) * 0.28;
+    camera.position.y = 2.6 - p * 1.2 + Math.sin(state.clock.elapsedTime * 0.22) * 0.28;
     camera.position.z = Math.cos(orbit) * radius;
     camera.lookAt(0, 0, 0);
   });
