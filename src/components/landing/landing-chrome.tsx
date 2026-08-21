@@ -24,10 +24,10 @@ export function LandingHeader() {
 
         <nav className="flex items-center gap-1 sm:gap-2">
           <Link
-            href="/demo"
+            href="/guide"
             className="rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c7f04a]"
           >
-            Explore demo
+            Open the guide
           </Link>
           <Button href="/signin" size="sm" className="bg-white text-[#0a0b09] hover:bg-white/90">
             Sign in
@@ -101,17 +101,17 @@ export function LandingHero() {
               className="animate-fade-up mt-10 flex flex-wrap items-center gap-3"
               style={{ animationDelay: "240ms" }}
             >
-              <Button href="/signin" size="lg">
-                Start learning
+              <Button href="/guide" size="lg">
+                Open the guide
                 <ArrowRight className="size-4" aria-hidden />
               </Button>
               <Button
-                href="/demo"
+                href="/signin"
                 size="lg"
                 variant="secondary"
                 className="border-white/15 bg-white/[0.05] text-white hover:border-white/25 hover:bg-white/[0.1]"
               >
-                Explore the demo
+                Staff sign in
               </Button>
             </div>
 
@@ -138,7 +138,7 @@ export function LandingHero() {
               className="animate-fade-up mt-6 text-xs text-white/35"
               style={{ animationDelay: "340ms" }}
             >
-              The demo uses fictional content and requires no account.
+              No account needed. Staff sign-in unlocks internal procedures.
             </p>
           </div>
 
