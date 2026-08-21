@@ -105,7 +105,7 @@ export const links: ImportantLink[] = [
       "Per-room technology layouts. Check here to identify a room's configuration before giving a faculty member instructions over the phone.",
     href: "#",
     category: "hardware",
-    visibility: "staff",
+    visibility: "public",
     pinned: false,
     updatedAt: "2026-08-15",
   },

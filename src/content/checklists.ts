@@ -17,7 +17,7 @@ export const checklists: Checklist[] = [
     purpose:
       "Run this at the start of any contact, before you start fixing anything.",
     category: "general",
-    visibility: "staff",
+    visibility: "public",
     status: "published",
     updatedAt: "2026-08-15",
     updatedBy: "Rian Fernando",
@@ -140,7 +140,7 @@ export const checklists: Checklist[] = [
       "The final pass before saving a Footprints ticket. Ten seconds of re-reading catches almost every ticket problem.",
     purpose: "Run this immediately before you press Save, every time.",
     category: "ticketing",
-    visibility: "staff",
+    visibility: "public",
     status: "published",
     updatedAt: "2026-08-15",
     updatedBy: "Rian Fernando",
@@ -245,7 +245,7 @@ export const checklists: Checklist[] = [
     purpose:
       "Run this the moment you feel the urge to start fixing something.",
     category: "general",
-    visibility: "staff",
+    visibility: "public",
     status: "published",
     updatedAt: "2026-08-15",
     updatedBy: "Rian Fernando",
