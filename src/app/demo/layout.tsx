@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AppShell } from "@/components/app/app-shell";
 import { ProgressProvider } from "@/lib/progress/store";
+import { experience } from "@/lib/config/experience";
 
 export const metadata: Metadata = {
   title: { default: "Demo", template: "%s · learnIT demo" },
@@ -22,6 +23,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
   return (
     <ProgressProvider>
       <AppShell
+        experience={experience()}
         demo
         basePath="/demo"
         user={{ name: "Guest", role: "guest", title: "Demonstration mode" }}

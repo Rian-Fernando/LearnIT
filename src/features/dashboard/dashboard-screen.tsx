@@ -21,6 +21,8 @@ import {
   recentlyUpdatedArticles,
 } from "@/lib/content/repository";
 import { formatDate, relativeDate } from "@/lib/format";
+import { isReferenceMode } from "@/lib/config/experience";
+import { listSystems } from "@/lib/content/repository";
 import { ContinueLearning, OnboardingProgress, type ModuleRef } from "./continue-learning";
 
 /**
@@ -38,11 +40,14 @@ export async function DashboardScreen({
   viewer: Viewer;
   basePath?: string;
 }) {
-  const [modules, recent, notices, links] = await Promise.all([
+  const referenceMode = isReferenceMode();
+
+  const [modules, recent, notices, links, systems] = await Promise.all([
     listModules(viewer),
     recentlyUpdatedArticles(viewer, 5),
     activeAnnouncements(viewer),
     listLinks(viewer),
+    referenceMode ? listSystems(viewer) : Promise.resolve([]),
   ]);
 
   const moduleRefs: ModuleRef[] = modules.map((module) => ({
@@ -83,26 +88,74 @@ export async function DashboardScreen({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         {/* ------------------------------------------------------- primary */}
         <div className="space-y-8">
-          <section aria-labelledby="continue-heading">
-            <SectionHeading
-              className="mb-4"
-              title="Continue learning"
-              description="Your onboarding track, in order."
-              action={
-                <Link
-                  href={`${basePath}/training`}
-                  className="flex items-center gap-1 text-sm text-secondary transition-colors hover:text-primary"
-                >
-                  All modules
-                  <ArrowRight className="size-3.5" aria-hidden />
-                </Link>
-              }
-            />
-            <h2 id="continue-heading" className="sr-only">
-              Continue learning
-            </h2>
-            <ContinueLearning modules={moduleRefs} basePath={basePath} />
-          </section>
+          {referenceMode ? (
+            /**
+             * The reference build opens on the systems directory rather than a
+             * course position. There is no "next module" to resume, and the
+             * first question on a call is which tool to open.
+             */
+            <section aria-labelledby="systems-heading">
+              <SectionHeading
+                className="mb-4"
+                title="The systems we use"
+                description="What each one is for, and when it sends you there."
+                action={
+                  <Link
+                    href={`${basePath}/reference`}
+                    className="flex items-center gap-1 text-sm text-secondary transition-colors hover:text-primary"
+                  >
+                    All reference
+                    <ArrowRight className="size-3.5" aria-hidden />
+                  </Link>
+                }
+              />
+              <h2 id="systems-heading" className="sr-only">
+                The systems we use
+              </h2>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {systems.slice(0, 6).map((system) => (
+                  <li key={system.slug}>
+                    <Link
+                      href={`${basePath}/reference/systems/${system.slug}`}
+                      className="group flex h-full flex-col rounded-xl border border-subtle bg-surface-raised p-4 transition-colors hover:border-default hover:bg-surface-overlay"
+                    >
+                      <span className="flex items-center gap-1.5 text-sm font-medium text-primary">
+                        {system.shortName}
+                        <ArrowRight
+                          className="size-3.5 text-tertiary transition-transform group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
+                      </span>
+                      <span className="mt-1 line-clamp-2 text-sm leading-6 text-tertiary">
+                        {system.summary}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : (
+            <section aria-labelledby="continue-heading">
+              <SectionHeading
+                className="mb-4"
+                title="Continue learning"
+                description="Your onboarding track, in order."
+                action={
+                  <Link
+                    href={`${basePath}/training`}
+                    className="flex items-center gap-1 text-sm text-secondary transition-colors hover:text-primary"
+                  >
+                    All modules
+                    <ArrowRight className="size-3.5" aria-hidden />
+                  </Link>
+                }
+              />
+              <h2 id="continue-heading" className="sr-only">
+                Continue learning
+              </h2>
+              <ContinueLearning modules={moduleRefs} basePath={basePath} />
+            </section>
+          )}
 
           <section aria-labelledby="actions-heading">
             <SectionHeading
@@ -191,7 +244,9 @@ export async function DashboardScreen({
 
         {/* ------------------------------------------------------- sidebar */}
         <aside className="space-y-6">
-          <OnboardingProgress modules={moduleRefs} basePath={basePath} />
+          {referenceMode ? null : (
+            <OnboardingProgress modules={moduleRefs} basePath={basePath} />
+          )}
 
           {pinned.length > 0 ? (
             <Surface className="p-5">

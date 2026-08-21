@@ -67,6 +67,7 @@ const DISALLOW = [
   "/progress",
   "/checklists",
   "/tickets",
+  "/reference",
 ];
 
 export default function robots(): MetadataRoute.Robots {

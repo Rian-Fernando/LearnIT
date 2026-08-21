@@ -8,6 +8,7 @@ import { Monogram, Wordmark } from "@/components/brand/wordmark";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import type { Role } from "@/lib/content/schema";
+import type { Experience } from "@/lib/config/experience";
 import { CommandPalette } from "./command-palette";
 import { navigationFor } from "./navigation";
 
@@ -30,16 +31,19 @@ export function AppShell({
   user,
   basePath = "",
   demo = false,
+  experience = "course",
   children,
 }: {
   user: ShellUser;
   basePath?: string;
   demo?: boolean;
+  /** Resolved on the server and passed in — the shell is a client component. */
+  experience?: Experience;
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const groups = navigationFor(user.role);
+  const groups = navigationFor(user.role, experience);
 
   // Close the mobile drawer on navigation — leaving it open over the new page
   // is a classic mobile navigation bug.

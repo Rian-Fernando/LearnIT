@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/app/app-shell";
 import { requireStaff } from "@/lib/auth";
 import { ProgressProvider } from "@/lib/progress/store";
+import { experience } from "@/lib/config/experience";
 
 /**
  * Authenticated application layout.
@@ -15,6 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <ProgressProvider>
       <AppShell
+        experience={experience()}
         user={{
           name: viewer.user.name,
           role: viewer.role,

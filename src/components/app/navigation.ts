@@ -4,12 +4,14 @@ import {
   LayoutDashboard,
   MessageSquareQuote,
   Route,
+  LayoutGrid,
   ShieldCheck,
   Terminal,
   Ticket,
   TrendingUp,
 } from "lucide-react";
 import type { Role } from "@/lib/content/schema";
+import { type Experience } from "@/lib/config/experience";
 
 /**
  * Application navigation.
@@ -26,6 +28,8 @@ export interface NavItem {
   icon: typeof BookOpen;
   description: string;
   requires?: Role;
+  /** Restrict this item to one experience. Omitted means both. */
+  experience?: Experience;
 }
 
 export interface NavGroup {
@@ -48,6 +52,8 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "My progress",
         icon: TrendingUp,
         description: "Onboarding completion and knowledge checks",
+        // Nothing to complete in the reference build.
+        experience: "course",
       },
     ],
   },
@@ -88,6 +94,15 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Training",
         icon: GraduationCap,
         description: "Structured onboarding modules",
+        /** Course experience only — replaced by Reference otherwise. */
+        experience: "course",
+      },
+      {
+        href: "/reference",
+        label: "Reference",
+        icon: LayoutGrid,
+        description: "Systems, ticket anatomy, what to collect",
+        experience: "reference",
       },
       {
         href: "/practice",
@@ -111,12 +126,23 @@ export const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-/** Groups visible to a role, with empty groups removed. */
-export function navigationFor(role: Role, allowed: string[] | null = null): NavGroup[] {
+/**
+ * Groups visible to a role in a given experience, with empty groups removed.
+ *
+ * Role filtering here is cosmetic — hiding a link is never what protects a
+ * route. Experience filtering is what swaps Training for Reference between the
+ * two builds.
+ */
+export function navigationFor(
+  role: Role,
+  mode: Experience = "course",
+  allowed: string[] | null = null,
+): NavGroup[] {
   return NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter((item) => {
       if (item.requires === "admin" && role !== "admin") return false;
+      if (item.experience && item.experience !== mode) return false;
       if (allowed && !allowed.includes(item.href)) return false;
       return true;
     }),

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { ProgressScreen } from "@/features/progress/progress-screen";
 import type { ModuleCard } from "@/features/training/module-list";
+import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth";
+import { isReferenceMode } from "@/lib/config/experience";
 import { CATEGORY_LABELS } from "@/lib/content/schema";
 import { listModules, listScenarios } from "@/lib/content/repository";
 import { relativeDate } from "@/lib/format";
@@ -9,6 +11,7 @@ import { relativeDate } from "@/lib/format";
 export const metadata: Metadata = { title: "My progress" };
 
 export default async function ProgressPage() {
+  if (isReferenceMode()) redirect("/reference");
   const viewer = await requireStaff({ returnTo: "/progress" });
 
   const [modules, scenarios] = await Promise.all([

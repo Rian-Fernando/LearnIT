@@ -34,6 +34,7 @@ const PROTECTED = [
   "/progress",
   "/checklists",
   "/tickets",
+  "/reference",
   "/admin",
 ];
 
