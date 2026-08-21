@@ -10,6 +10,7 @@ import {
   responses,
   scenarios,
   simulations,
+  systems,
   taxonomies,
   tickets,
 } from "@/content";
@@ -33,6 +34,7 @@ export const fileAdapter: ContentSource = {
   checklists: async () => checklists,
   tickets: async () => tickets,
   simulations: async () => simulations,
+  systems: async () => systems,
   taxonomies: async () => taxonomies,
   backlog: async () => backlog,
   modules: async () => modules,

@@ -660,6 +660,42 @@ export const ReferenceTicketSchema = ContentMetaSchema.extend({
 export type ReferenceTicket = z.infer<typeof ReferenceTicketSchema>;
 
 /* ========================================================================== *
+ * Systems directory
+ * ========================================================================== */
+
+/**
+ * One of the systems a technician actually touches.
+ *
+ * This is the backbone of the reference experience: a new technician's first
+ * question is rarely "what is the procedure" — it is "which of these ten things
+ * do I open?". A course answers that on week two. A directory answers it in ten
+ * seconds, during the call.
+ */
+export const SystemSchema = ContentMetaSchema.extend({
+  /** Short label used in cards and tables. */
+  shortName: z.string().min(1).max(40),
+  category: CategorySchema,
+  /** What it is, in one sentence a new starter understands. */
+  purpose: z.string().min(1).max(300),
+  /** The situations that send you here. */
+  whenYouUseIt: z.array(z.string().min(1)).min(1),
+  /** Centrally-managed link key, when the system has a URL. */
+  linkKey: SlugSchema.optional(),
+  /** Reference facts worth having in front of you. */
+  keyFacts: z
+    .array(z.object({ label: z.string().min(1), value: z.string().min(1) }))
+    .default([]),
+  /** The mistakes people actually make with this system. */
+  watchOut: z.array(z.string().min(1)).default([]),
+  articleSlugs: z.array(SlugSchema).default([]),
+  /** The module that covers it in depth, in the course experience. */
+  moduleSlug: SlugSchema.optional(),
+  /** Ordering within the directory. */
+  order: z.number().int().min(0).default(50),
+});
+export type AdelphiSystem = z.infer<typeof SystemSchema>;
+
+/* ========================================================================== *
  * Ticket simulations
  * ========================================================================== */
 

@@ -6,6 +6,7 @@ import { isDemoMode } from "@/lib/config/env";
 import { canList, canView } from "./access";
 import { fileAdapter } from "./adapters/file";
 import type {
+  AdelphiSystem,
   Announcement,
   Article,
   BacklogItem,
@@ -43,6 +44,7 @@ export interface ContentSource {
   checklists(): Promise<Checklist[]>;
   tickets(): Promise<ReferenceTicket[]>;
   simulations(): Promise<TicketSimulation[]>;
+  systems(): Promise<AdelphiSystem[]>;
   /** Not viewer-filtered — option lists carry no user data. */
   taxonomies(): Promise<Taxonomy[]>;
   /** Admin-only. Never served to staff or guests. */
@@ -259,6 +261,26 @@ export async function getTicket(
 ): Promise<ReferenceTicket | null> {
   const all = await load(() => getContentSource().tickets());
   const found = all.find((t) => t.slug === slug);
+  return found && canView(viewer, found) ? found : null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Systems directory                                                          */
+/* -------------------------------------------------------------------------- */
+
+export async function listSystems(viewer: Viewer): Promise<AdelphiSystem[]> {
+  const all = await load(() => getContentSource().systems());
+  return all
+    .filter((s) => canList(viewer, s))
+    .sort((a, b) => a.order - b.order || a.shortName.localeCompare(b.shortName));
+}
+
+export async function getSystem(
+  viewer: Viewer,
+  slug: string,
+): Promise<AdelphiSystem | null> {
+  const all = await load(() => getContentSource().systems());
+  const found = all.find((s) => s.slug === slug);
   return found && canView(viewer, found) ? found : null;
 }
 
