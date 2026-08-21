@@ -21,6 +21,16 @@ Everything below serves one of those two.
 
 ---
 
+## Three ways in
+
+| Route | Sign-in | For |
+| --- | --- | --- |
+| `/guide` | **No** | Anyone. Ticket basics, what to collect, systems, bookmarks. The link you send a new hire on day one. |
+| `/demo` | No | Fuller public walkthrough — knowledge base, troubleshooting, practice. |
+| `/dashboard` … | Yes | Internal procedures, escalation paths, admin. |
+
+---
+
 ## Two experiences, one codebase
 
 Selected by `NEXT_PUBLIC_EXPERIENCE`, so both deploy from the same repository.
@@ -38,6 +48,13 @@ Both are live in the codebase today. Set the variable per deployment.
 ---
 
 ## Built
+
+### Public guide (no sign-in)
+- [x] `/guide` — start here, the eight-step call shape, checklists
+- [x] `/guide/ticket-basics` — the Footprints form field by field
+- [x] `/guide/systems` — 10 systems, what each is for
+- [x] `/guide/bookmarks` — downloadable Chrome bookmark file
+- [x] ~3 MB JS heap per page, 6–9 scripts, no WebGL
 
 ### Platform
 - [x] Next.js App Router, React 19, TypeScript strict, Tailwind v4
@@ -135,9 +152,11 @@ Ordered by dependency, not ambition.
 5. **Knowledge checks** on the remaining modules
 6. **Authenticated image route** — so internal screenshots can appear in-product
    without being publicly reachable by URL *(decision needed)*
-7. **Postgres via Neon** — durable review queue, admin edits, cross-device progress
-8. **Ticket consolidation** — see below
-9. Feedex integration *(explicitly last)*
+7. **Populate Important Links from a real bookmark export** — turns the download
+   from empty into the thing that saves a new hire their first hour
+8. **Postgres via Neon** — durable review queue, admin edits, cross-device progress
+9. **Ticket consolidation** — see below
+10. Feedex integration *(explicitly last)*
 
 ---
 
@@ -170,6 +189,26 @@ export means clustering, by hand means authoring.
 | Reports and admin edits reset on restart | Stated in the admin UI; fixed by the Postgres adapter |
 | No rate limiting on report submission or sign-in | Usually handled upstream; confirm before internal rollout |
 | No audit log for admin actions | Single place to add it: `features/admin/actions.ts` |
+| Systems, checklists, and ticket anatomy are now **publicly readable** so the guide can work without sign-in | Deliberate, and worth confirming. Contains Footprints field names, title conventions, and system purposes — no credentials, no user data, no escalation paths. |
+
+---
+
+## Memory
+
+Measured in headless Chrome, since a technician runs many tabs.
+
+| Page | JS heap | Scripts |
+| --- | --- | --- |
+| Guide pages | ~3.0–3.2 MB | 6–9 |
+| Demo app pages | ~4.5–5.4 MB | — |
+| Landing (WebGL) | ~7.1 MB | 9 |
+
+For scale, a typical single-page app sits at 30–80 MB. The guide is roughly the
+cost of a document.
+
+The landing releases its WebGL context entirely when the tab is backgrounded —
+pausing the render loop is not enough, because a live context holds a
+framebuffer and the scene in GPU memory whether or not it is drawing.
 
 ---
 
